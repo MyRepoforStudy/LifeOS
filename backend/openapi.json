@@ -1,0 +1,2799 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "LifeOS RPG API",
+    "description": "XP ledger, levels and quests of LifeOS RPG.",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/v1/auth/register": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Register",
+        "operationId": "register_api_v1_auth_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenPairOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Login",
+        "operationId": "login_api_v1_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenPairOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/refresh": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Refresh",
+        "operationId": "refresh_api_v1_auth_refresh_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenPairOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Logout",
+        "operationId": "logout_api_v1_auth_logout_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/account/delete": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Delete Account",
+        "description": "Delete the account and all its data, including the XP ledger.",
+        "operationId": "delete_account_api_v1_account_delete_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccountDeleteIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/player/profile": {
+      "get": {
+        "tags": [
+          "player"
+        ],
+        "summary": "Get Profile",
+        "operationId": "get_profile_api_v1_player_profile_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileOut"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "player"
+        ],
+        "summary": "Update Profile",
+        "description": "A new time zone takes effect at the next local midnight.",
+        "operationId": "update_profile_api_v1_player_profile_patch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileUpdateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/player/attributes": {
+      "get": {
+        "tags": [
+          "player"
+        ],
+        "summary": "Get Attributes",
+        "operationId": "get_attributes_api_v1_player_attributes_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AttributeOut"
+                  },
+                  "type": "array",
+                  "title": "Response Get Attributes Api V1 Player Attributes Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/player/xp-history": {
+      "get": {
+        "tags": [
+          "player"
+        ],
+        "summary": "Get Xp History",
+        "operationId": "get_xp_history_api_v1_player_xp_history_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          },
+          {
+            "name": "date_from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date From"
+            }
+          },
+          {
+            "name": "date_to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date To"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/XpHistoryOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/player/statistics": {
+      "get": {
+        "tags": [
+          "player"
+        ],
+        "summary": "Get Statistics",
+        "description": "XP by local day and by attribute for a period (default: the last 30 days).",
+        "operationId": "get_statistics_api_v1_player_statistics_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "date_from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date From"
+            }
+          },
+          {
+            "name": "date_to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date To"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatisticsOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/quests": {
+      "get": {
+        "tags": [
+          "quests"
+        ],
+        "summary": "List Quests",
+        "description": "`scope=today`: quests that can be done now, plus one-off quests finished today.",
+        "operationId": "list_quests_api_v1_quests_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "quest_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/QuestType"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Quest Type"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/EffectiveQuestStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "all",
+                "today"
+              ],
+              "type": "string",
+              "default": "all",
+              "title": "Scope"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 500,
+              "minimum": 1,
+              "default": 100,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestListOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "quests"
+        ],
+        "summary": "Create Quest",
+        "description": "The XP reward is computed by the server from type, activity and difficulty.",
+        "operationId": "create_quest_api_v1_quests_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Client-generated key (e.g. a UUID). A retry with the same key returns the first response.",
+              "title": "Idempotency-Key"
+            },
+            "description": "Client-generated key (e.g. a UUID). A retry with the same key returns the first response."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuestCreateIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/quests/{quest_id}": {
+      "get": {
+        "tags": [
+          "quests"
+        ],
+        "summary": "Get Quest",
+        "operationId": "get_quest_api_v1_quests__quest_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "quest_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Quest Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestDetailOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "quests"
+        ],
+        "summary": "Update Quest",
+        "description": "Type, difficulty, activity and reward are fixed at creation and cannot be changed.",
+        "operationId": "update_quest_api_v1_quests__quest_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "quest_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Quest Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuestUpdateIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "quests"
+        ],
+        "summary": "Delete Quest",
+        "description": "Removes the quest from lists; XP earned with it stays.",
+        "operationId": "delete_quest_api_v1_quests__quest_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "quest_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Quest Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/quests/{quest_id}/complete": {
+      "post": {
+        "tags": [
+          "quests"
+        ],
+        "summary": "Complete Quest",
+        "description": "Complete the current occurrence. XP is awarded once per occurrence.",
+        "operationId": "complete_quest_api_v1_quests__quest_id__complete_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "quest_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Quest Id"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Client-generated key (e.g. a UUID). A retry with the same key returns the first response.",
+              "title": "Idempotency-Key"
+            },
+            "description": "Client-generated key (e.g. a UUID). A retry with the same key returns the first response."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompletionOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/quests/{quest_id}/skip": {
+      "post": {
+        "tags": [
+          "quests"
+        ],
+        "summary": "Skip Quest",
+        "description": "Skip the current occurrence. Skipping never removes XP.",
+        "operationId": "skip_quest_api_v1_quests__quest_id__skip_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "quest_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Quest Id"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Client-generated key (e.g. a UUID). A retry with the same key returns the first response.",
+              "title": "Idempotency-Key"
+            },
+            "description": "Client-generated key (e.g. a UUID). A retry with the same key returns the first response."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkipOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/quests/{quest_id}/undo": {
+      "post": {
+        "tags": [
+          "quests"
+        ],
+        "summary": "Undo Completion",
+        "description": "Undo a completion made by mistake; allowed until the end of the same local day.",
+        "operationId": "undo_completion_api_v1_quests__quest_id__undo_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "quest_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Quest Id"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Client-generated key (e.g. a UUID). A retry with the same key returns the first response.",
+              "title": "Idempotency-Key"
+            },
+            "description": "Client-generated key (e.g. a UUID). A retry with the same key returns the first response."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UndoOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/config/levels": {
+      "get": {
+        "tags": [
+          "config"
+        ],
+        "summary": "Get Levels",
+        "description": "The level table, generated on the server from the current curve.",
+        "operationId": "get_levels_api_v1_config_levels_get",
+        "parameters": [
+          {
+            "name": "up_to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 50,
+              "title": "Up To"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LevelTableOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/config/rewards": {
+      "get": {
+        "tags": [
+          "config"
+        ],
+        "summary": "Get Rewards",
+        "operationId": "get_rewards_api_v1_config_rewards_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RewardRules"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Health",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Health Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AccountDeleteIn": {
+        "properties": {
+          "password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Password"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "password"
+        ],
+        "title": "AccountDeleteIn"
+      },
+      "Activity": {
+        "type": "string",
+        "enum": [
+          "task",
+          "learning",
+          "workout"
+        ],
+        "title": "Activity",
+        "description": "What the quest is about; decides which reward rule applies."
+      },
+      "AttributeOut": {
+        "properties": {
+          "level": {
+            "type": "integer",
+            "title": "Level"
+          },
+          "total_xp": {
+            "type": "integer",
+            "title": "Total Xp"
+          },
+          "xp_in_level": {
+            "type": "integer",
+            "title": "Xp In Level"
+          },
+          "xp_for_level": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Xp For Level"
+          },
+          "xp_to_next_level": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Xp To Next Level"
+          },
+          "level_progress": {
+            "type": "number",
+            "title": "Level Progress"
+          },
+          "attribute_type": {
+            "$ref": "#/components/schemas/AttributeType"
+          },
+          "xp_last_7_days": {
+            "type": "integer",
+            "title": "Xp Last 7 Days"
+          },
+          "xp_last_30_days": {
+            "type": "integer",
+            "title": "Xp Last 30 Days"
+          }
+        },
+        "type": "object",
+        "required": [
+          "level",
+          "total_xp",
+          "xp_in_level",
+          "xp_for_level",
+          "xp_to_next_level",
+          "level_progress",
+          "attribute_type",
+          "xp_last_7_days",
+          "xp_last_30_days"
+        ],
+        "title": "AttributeOut"
+      },
+      "AttributeType": {
+        "type": "string",
+        "enum": [
+          "health",
+          "intelligence",
+          "career",
+          "finance"
+        ],
+        "title": "AttributeType"
+      },
+      "ChecklistItem": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "done": {
+            "type": "boolean",
+            "title": "Done",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "title": "ChecklistItem"
+      },
+      "CompletionOut": {
+        "properties": {
+          "quest": {
+            "$ref": "#/components/schemas/QuestOut"
+          },
+          "occurrence": {
+            "$ref": "#/components/schemas/OccurrenceOut"
+          },
+          "xp_awarded": {
+            "type": "integer",
+            "title": "Xp Awarded"
+          },
+          "xp_limit_reason": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/XpLimitReason"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "player": {
+            "$ref": "#/components/schemas/PlayerXpOut"
+          }
+        },
+        "type": "object",
+        "required": [
+          "quest",
+          "occurrence",
+          "xp_awarded",
+          "xp_limit_reason",
+          "player"
+        ],
+        "title": "CompletionOut"
+      },
+      "DailyXp": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "xp": {
+            "type": "integer",
+            "title": "Xp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date",
+          "xp"
+        ],
+        "title": "DailyXp"
+      },
+      "Difficulty": {
+        "type": "string",
+        "enum": [
+          "simple",
+          "medium",
+          "hard",
+          "epic"
+        ],
+        "title": "Difficulty"
+      },
+      "EffectiveQuestStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "active",
+          "completed",
+          "skipped",
+          "expired",
+          "cancelled"
+        ],
+        "title": "EffectiveQuestStatus",
+        "description": "Status shown to the client: the stored one plus time-based states."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "LedgerEntryOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "event_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Event Id"
+          },
+          "source_type": {
+            "type": "string",
+            "title": "Source Type"
+          },
+          "source_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Id"
+          },
+          "occurrence_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Occurrence Date"
+          },
+          "attribute_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Attribute Type"
+          },
+          "xp_amount": {
+            "type": "integer",
+            "title": "Xp Amount"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "reverses_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reverses Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "event_id",
+          "source_type",
+          "source_id",
+          "occurrence_date",
+          "attribute_type",
+          "xp_amount",
+          "reason",
+          "description",
+          "reverses_id",
+          "created_at"
+        ],
+        "title": "LedgerEntryOut"
+      },
+      "LevelRowOut": {
+        "properties": {
+          "level": {
+            "type": "integer",
+            "title": "Level"
+          },
+          "xp_to_next_level": {
+            "type": "integer",
+            "title": "Xp To Next Level"
+          },
+          "total_xp_required": {
+            "type": "integer",
+            "title": "Total Xp Required"
+          }
+        },
+        "type": "object",
+        "required": [
+          "level",
+          "xp_to_next_level",
+          "total_xp_required"
+        ],
+        "title": "LevelRowOut"
+      },
+      "LevelTableOut": {
+        "properties": {
+          "base": {
+            "type": "integer",
+            "title": "Base"
+          },
+          "exponent": {
+            "type": "number",
+            "title": "Exponent"
+          },
+          "levels": {
+            "items": {
+              "$ref": "#/components/schemas/LevelRowOut"
+            },
+            "type": "array",
+            "title": "Levels"
+          }
+        },
+        "type": "object",
+        "required": [
+          "base",
+          "exponent",
+          "levels"
+        ],
+        "title": "LevelTableOut"
+      },
+      "LoginIn": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Password"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "title": "LoginIn"
+      },
+      "OccurrenceOut": {
+        "properties": {
+          "occurrence_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Occurrence Date"
+          },
+          "status": {
+            "$ref": "#/components/schemas/OccurrenceStatus"
+          },
+          "xp_awarded": {
+            "type": "integer",
+            "title": "Xp Awarded"
+          },
+          "minutes_credited": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Minutes Credited"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "skipped_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Skipped At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "occurrence_date",
+          "status",
+          "xp_awarded",
+          "minutes_credited",
+          "completed_at",
+          "skipped_at"
+        ],
+        "title": "OccurrenceOut"
+      },
+      "OccurrenceStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "completed",
+          "skipped"
+        ],
+        "title": "OccurrenceStatus"
+      },
+      "PlayerXpOut": {
+        "properties": {
+          "level": {
+            "type": "integer",
+            "title": "Level"
+          },
+          "total_xp": {
+            "type": "integer",
+            "title": "Total Xp"
+          },
+          "xp_in_level": {
+            "type": "integer",
+            "title": "Xp In Level"
+          },
+          "xp_for_level": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Xp For Level"
+          },
+          "xp_to_next_level": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Xp To Next Level"
+          },
+          "level_progress": {
+            "type": "number",
+            "title": "Level Progress"
+          },
+          "previous_level": {
+            "type": "integer",
+            "title": "Previous Level"
+          },
+          "leveled_up": {
+            "type": "boolean",
+            "title": "Leveled Up"
+          }
+        },
+        "type": "object",
+        "required": [
+          "level",
+          "total_xp",
+          "xp_in_level",
+          "xp_for_level",
+          "xp_to_next_level",
+          "level_progress",
+          "previous_level",
+          "leveled_up"
+        ],
+        "title": "PlayerXpOut"
+      },
+      "ProfileOut": {
+        "properties": {
+          "level": {
+            "type": "integer",
+            "title": "Level"
+          },
+          "total_xp": {
+            "type": "integer",
+            "title": "Total Xp"
+          },
+          "xp_in_level": {
+            "type": "integer",
+            "title": "Xp In Level"
+          },
+          "xp_for_level": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Xp For Level"
+          },
+          "xp_to_next_level": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Xp To Next Level"
+          },
+          "level_progress": {
+            "type": "number",
+            "title": "Level Progress"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          },
+          "avatar_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avatar Url"
+          },
+          "registered_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Registered At"
+          },
+          "development_started_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Development Started On"
+          },
+          "timezone": {
+            "type": "string",
+            "title": "Timezone"
+          },
+          "pending_timezone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pending Timezone"
+          },
+          "pending_timezone_from": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pending Timezone From"
+          },
+          "active_quests": {
+            "type": "integer",
+            "title": "Active Quests"
+          },
+          "completed_quests": {
+            "type": "integer",
+            "title": "Completed Quests"
+          },
+          "last_activity_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Activity At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "level",
+          "total_xp",
+          "xp_in_level",
+          "xp_for_level",
+          "xp_to_next_level",
+          "level_progress",
+          "user_id",
+          "email",
+          "display_name",
+          "avatar_url",
+          "registered_at",
+          "development_started_on",
+          "timezone",
+          "pending_timezone",
+          "pending_timezone_from",
+          "active_quests",
+          "completed_quests",
+          "last_activity_at"
+        ],
+        "title": "ProfileOut"
+      },
+      "ProfileUpdateIn": {
+        "properties": {
+          "display_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Display Name"
+          },
+          "avatar_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500,
+                "pattern": "^https?://"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avatar Url"
+          },
+          "development_started_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Development Started On"
+          },
+          "timezone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timezone"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "ProfileUpdateIn"
+      },
+      "QuestCategory": {
+        "type": "string",
+        "enum": [
+          "health",
+          "learning",
+          "career",
+          "finance",
+          "other"
+        ],
+        "title": "QuestCategory"
+      },
+      "QuestCreateIn": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 5000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "quest_type": {
+            "$ref": "#/components/schemas/QuestType"
+          },
+          "category": {
+            "$ref": "#/components/schemas/QuestCategory"
+          },
+          "attribute_types": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/AttributeType"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Attribute Types",
+            "description": "Defaults to the attribute of the category"
+          },
+          "activity": {
+            "$ref": "#/components/schemas/Activity",
+            "default": "task"
+          },
+          "difficulty": {
+            "$ref": "#/components/schemas/Difficulty",
+            "default": "medium"
+          },
+          "target_minutes": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 1440.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Minutes"
+          },
+          "is_recurring": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Recurring",
+            "description": "Defaults to true for daily and weekly quests"
+          },
+          "weekdays": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weekdays"
+          },
+          "priority": {
+            "type": "integer",
+            "maximum": 3.0,
+            "minimum": 1.0,
+            "title": "Priority",
+            "default": 2
+          },
+          "starts_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Starts At"
+          },
+          "due_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Due At"
+          },
+          "checklist": {
+            "items": {
+              "$ref": "#/components/schemas/ChecklistItem"
+            },
+            "type": "array",
+            "maxItems": 50,
+            "title": "Checklist"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "title",
+          "quest_type",
+          "category"
+        ],
+        "title": "QuestCreateIn"
+      },
+      "QuestDetailOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "quest_type": {
+            "$ref": "#/components/schemas/QuestType"
+          },
+          "category": {
+            "$ref": "#/components/schemas/QuestCategory"
+          },
+          "attribute_types": {
+            "items": {
+              "$ref": "#/components/schemas/AttributeType"
+            },
+            "type": "array",
+            "title": "Attribute Types"
+          },
+          "activity": {
+            "$ref": "#/components/schemas/Activity"
+          },
+          "difficulty": {
+            "$ref": "#/components/schemas/Difficulty"
+          },
+          "target_minutes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Minutes"
+          },
+          "xp_reward": {
+            "type": "integer",
+            "title": "Xp Reward"
+          },
+          "status": {
+            "$ref": "#/components/schemas/EffectiveQuestStatus"
+          },
+          "is_recurring": {
+            "type": "boolean",
+            "title": "Is Recurring"
+          },
+          "weekdays": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weekdays"
+          },
+          "priority": {
+            "type": "integer",
+            "title": "Priority"
+          },
+          "checklist": {
+            "items": {
+              "$ref": "#/components/schemas/ChecklistItem"
+            },
+            "type": "array",
+            "title": "Checklist"
+          },
+          "starts_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Starts At"
+          },
+          "due_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Due At"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "current_occurrence_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Occurrence Date",
+            "description": "The day (or week start) the quest can be completed for right now"
+          },
+          "current_occurrence": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OccurrenceOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "occurrences": {
+            "items": {
+              "$ref": "#/components/schemas/OccurrenceOut"
+            },
+            "type": "array",
+            "title": "Occurrences"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "description",
+          "quest_type",
+          "category",
+          "attribute_types",
+          "activity",
+          "difficulty",
+          "target_minutes",
+          "xp_reward",
+          "status",
+          "is_recurring",
+          "weekdays",
+          "priority",
+          "checklist",
+          "starts_at",
+          "due_at",
+          "completed_at",
+          "created_at",
+          "updated_at",
+          "current_occurrence_date",
+          "current_occurrence",
+          "occurrences"
+        ],
+        "title": "QuestDetailOut"
+      },
+      "QuestListOut": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/QuestOut"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "QuestListOut"
+      },
+      "QuestOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "quest_type": {
+            "$ref": "#/components/schemas/QuestType"
+          },
+          "category": {
+            "$ref": "#/components/schemas/QuestCategory"
+          },
+          "attribute_types": {
+            "items": {
+              "$ref": "#/components/schemas/AttributeType"
+            },
+            "type": "array",
+            "title": "Attribute Types"
+          },
+          "activity": {
+            "$ref": "#/components/schemas/Activity"
+          },
+          "difficulty": {
+            "$ref": "#/components/schemas/Difficulty"
+          },
+          "target_minutes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Minutes"
+          },
+          "xp_reward": {
+            "type": "integer",
+            "title": "Xp Reward"
+          },
+          "status": {
+            "$ref": "#/components/schemas/EffectiveQuestStatus"
+          },
+          "is_recurring": {
+            "type": "boolean",
+            "title": "Is Recurring"
+          },
+          "weekdays": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weekdays"
+          },
+          "priority": {
+            "type": "integer",
+            "title": "Priority"
+          },
+          "checklist": {
+            "items": {
+              "$ref": "#/components/schemas/ChecklistItem"
+            },
+            "type": "array",
+            "title": "Checklist"
+          },
+          "starts_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Starts At"
+          },
+          "due_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Due At"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "current_occurrence_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Occurrence Date",
+            "description": "The day (or week start) the quest can be completed for right now"
+          },
+          "current_occurrence": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OccurrenceOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "description",
+          "quest_type",
+          "category",
+          "attribute_types",
+          "activity",
+          "difficulty",
+          "target_minutes",
+          "xp_reward",
+          "status",
+          "is_recurring",
+          "weekdays",
+          "priority",
+          "checklist",
+          "starts_at",
+          "due_at",
+          "completed_at",
+          "created_at",
+          "updated_at",
+          "current_occurrence_date",
+          "current_occurrence"
+        ],
+        "title": "QuestOut"
+      },
+      "QuestType": {
+        "type": "string",
+        "enum": [
+          "daily",
+          "weekly",
+          "personal",
+          "challenge",
+          "milestone"
+        ],
+        "title": "QuestType"
+      },
+      "QuestUpdateIn": {
+        "properties": {
+          "title": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 5000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "priority": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 3.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Priority"
+          },
+          "due_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Due At"
+          },
+          "weekdays": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weekdays"
+          },
+          "checklist": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ChecklistItem"
+                },
+                "type": "array",
+                "maxItems": 50
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checklist"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "QuestUpdateIn",
+        "description": "Only descriptive fields can change; type, difficulty and reward are fixed at creation."
+      },
+      "RefreshIn": {
+        "properties": {
+          "refresh_token": {
+            "type": "string",
+            "maxLength": 256,
+            "minLength": 16,
+            "title": "Refresh Token"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "refresh_token"
+        ],
+        "title": "RefreshIn"
+      },
+      "RegisterIn": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 8,
+            "title": "Password"
+          },
+          "display_name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Display Name"
+          },
+          "timezone": {
+            "type": "string",
+            "title": "Timezone",
+            "default": "UTC"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "email",
+          "password",
+          "display_name"
+        ],
+        "title": "RegisterIn"
+      },
+      "RewardRules": {
+        "properties": {
+          "task_simple": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Task Simple",
+            "default": 10
+          },
+          "task_medium": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Task Medium",
+            "default": 20
+          },
+          "task_hard": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Task Hard",
+            "default": 40
+          },
+          "task_epic": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Task Epic",
+            "default": 100
+          },
+          "habit": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Habit",
+            "default": 15
+          },
+          "workout": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Workout",
+            "default": 30
+          },
+          "weekly_quest": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Weekly Quest",
+            "default": 100
+          },
+          "cycle_completion": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Cycle Completion",
+            "default": 200
+          },
+          "learning_block_minutes": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Learning Block Minutes",
+            "default": 30
+          },
+          "learning_first_block": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Learning First Block",
+            "default": 15
+          },
+          "learning_next_block": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Learning Next Block",
+            "default": 10
+          },
+          "learning_daily_cap_minutes": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Learning Daily Cap Minutes",
+            "default": 240
+          },
+          "challenge_multiplier": {
+            "type": "number",
+            "minimum": 1.0,
+            "title": "Challenge Multiplier",
+            "default": 2.0
+          },
+          "simple_task_daily_limit": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Simple Task Daily Limit",
+            "default": 5
+          }
+        },
+        "type": "object",
+        "title": "RewardRules"
+      },
+      "SkipOut": {
+        "properties": {
+          "quest": {
+            "$ref": "#/components/schemas/QuestOut"
+          },
+          "occurrence": {
+            "$ref": "#/components/schemas/OccurrenceOut"
+          }
+        },
+        "type": "object",
+        "required": [
+          "quest",
+          "occurrence"
+        ],
+        "title": "SkipOut"
+      },
+      "StatisticsOut": {
+        "properties": {
+          "date_from": {
+            "type": "string",
+            "format": "date",
+            "title": "Date From"
+          },
+          "date_to": {
+            "type": "string",
+            "format": "date",
+            "title": "Date To"
+          },
+          "timezone": {
+            "type": "string",
+            "title": "Timezone"
+          },
+          "total_xp": {
+            "type": "integer",
+            "title": "Total Xp"
+          },
+          "quests_completed": {
+            "type": "integer",
+            "title": "Quests Completed"
+          },
+          "quests_skipped": {
+            "type": "integer",
+            "title": "Quests Skipped"
+          },
+          "xp_by_day": {
+            "items": {
+              "$ref": "#/components/schemas/DailyXp"
+            },
+            "type": "array",
+            "title": "Xp By Day"
+          },
+          "xp_by_attribute": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Xp By Attribute"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date_from",
+          "date_to",
+          "timezone",
+          "total_xp",
+          "quests_completed",
+          "quests_skipped",
+          "xp_by_day",
+          "xp_by_attribute"
+        ],
+        "title": "StatisticsOut"
+      },
+      "TokenPairOut": {
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "title": "Access Token"
+          },
+          "refresh_token": {
+            "type": "string",
+            "title": "Refresh Token"
+          },
+          "token_type": {
+            "type": "string",
+            "title": "Token Type",
+            "default": "bearer"
+          },
+          "expires_in": {
+            "type": "integer",
+            "title": "Expires In",
+            "description": "Access token lifetime in seconds"
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_token",
+          "refresh_token",
+          "expires_in"
+        ],
+        "title": "TokenPairOut"
+      },
+      "UndoOut": {
+        "properties": {
+          "quest": {
+            "$ref": "#/components/schemas/QuestOut"
+          },
+          "occurrence": {
+            "$ref": "#/components/schemas/OccurrenceOut"
+          },
+          "xp_reverted": {
+            "type": "integer",
+            "title": "Xp Reverted"
+          },
+          "player": {
+            "$ref": "#/components/schemas/PlayerXpOut"
+          }
+        },
+        "type": "object",
+        "required": [
+          "quest",
+          "occurrence",
+          "xp_reverted",
+          "player"
+        ],
+        "title": "UndoOut"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "XpHistoryOut": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/LedgerEntryOut"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "next_offset": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Offset"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "next_offset"
+        ],
+        "title": "XpHistoryOut"
+      },
+      "XpLimitReason": {
+        "type": "string",
+        "enum": [
+          "simple_task_daily_limit",
+          "learning_daily_cap"
+        ],
+        "title": "XpLimitReason"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

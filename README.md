@@ -10,7 +10,7 @@
 | Фаза 1 — ядро: профиль, XP Ledger, уровни | готово |
 | Фаза 2 — квесты: daily / weekly / personal / challenge / milestone | готово |
 | Авторизация: JWT + refresh-токены с ротацией, Argon2id | готово |
-| Клиент (PWA: React + TypeScript + Vite) | следующая итерация |
+| Клиент (PWA: React + TypeScript + Vite): главная, квесты, профиль | готово |
 | Фаза 3 — достижения и стрики | дальше |
 | Фазы 4–6 — циклы, Adaptive Engine, аналитика | дальше |
 
@@ -25,6 +25,11 @@ backend/
   app/routers/     HTTP API /api/v1
   migrations/      миграции Alembic
   tests/           тесты на настоящем PostgreSQL
+web/
+  src/api/         клиент API: токены, повторы, Idempotency-Key, типы из OpenAPI
+  src/pages/       экраны: вход, главная, квесты, карточка квеста, профиль
+  src/components/  интерфейс Premium Dark
+  src/i18n/        тексты RU и EN
 scripts/devdb.ps1  локальный PostgreSQL для разработки
 docs/              решения и документация
 ```
@@ -51,6 +56,25 @@ py -3.14 -m venv .venv
 # 5. Тесты (база lifeos_test пересоздаётся при каждом запуске)
 .\.venv\Scripts\python -m pytest
 ```
+
+Клиент (нужен Node.js 22+; сервер API из шага 4 должен работать):
+
+```powershell
+cd web
+npm install
+npm run dev        # http://localhost:5173, запросы /api уходят на :8000
+npm test           # тесты API-клиента
+npm run build      # проверка типов и сборка PWA в web/dist
+```
+
+**С телефона.** Запусти `npm run dev:lan` и открой на телефоне `http://<IP компьютера>:5173`.
+Телефон и компьютер должны быть в одной сети Wi-Fi. При первом запуске Windows может
+спросить, разрешить ли Node.js доступ к частной сети — разреши. Так приложение работает
+как сайт. Чтобы установить его на главный экран и получать уведомления, нужен HTTPS:
+это даст Tailscale или сервер, и этим займёмся на этапе деплоя.
+
+**Типы API.** После изменения бэкенда обнови типы клиента:
+`backend\.venv\Scripts\python backend\scripts\export_openapi.py`, затем `npm run api:types` в `web`.
 
 `devdb.ps1 init` создаёт кластер в `%LOCALAPPDATA%\LifeOS\pgdata`, роль `lifeos`
 и базы `lifeos` и `lifeos_test`. Случайные пароли он записывает в `backend/.env`,
