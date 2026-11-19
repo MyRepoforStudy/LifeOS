@@ -108,6 +108,9 @@ function Initialize-Cluster($Map) {
 }
 
 function Start-Server {
+    if (-not (Test-Path -LiteralPath (Join-Path $DataDir 'PG_VERSION'))) {
+        throw "No database cluster in $DataDir yet. Create it once with: powershell -ExecutionPolicy Bypass -File .\scripts\devdb.ps1 init"
+    }
     if (Test-ServerRunning) {
         Write-Host "PostgreSQL is already running on localhost:$Port"
         return
