@@ -99,6 +99,16 @@ describe("ApiClient", () => {
     expect(store.value).toBeNull();
   });
 
+  it("reports a non-API answer (e.g. a dev server without proxy) as api_unavailable", async () => {
+    const fetchMock = vi.fn(async () => new Response(null, { status: 404 }));
+    const client = new ApiClient({ baseUrl: "", store: memoryStore(), lock: noLock, fetch: fetchMock });
+
+    await expect(client.request("POST", "/auth/register", { auth: false, body: {} })).rejects.toMatchObject({
+      status: 404,
+      code: "api_unavailable",
+    });
+  });
+
   it("turns error bodies into ApiError with the server code", async () => {
     const fetchMock = vi.fn(async () => json(409, { error: { code: "already_completed", message: "done" } }));
     const client = new ApiClient({ baseUrl: "", store: memoryStore(), lock: noLock, fetch: fetchMock });

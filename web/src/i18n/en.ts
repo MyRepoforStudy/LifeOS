@@ -159,6 +159,7 @@ export const en: Messages = {
   errors: {
     generic: "Something went wrong. Please try again.",
     network_error: "Cannot reach the server",
+    api_unavailable: "The API server is unavailable. Check that it is running.",
     session_expired: "Session expired, please sign in again",
     invalid_credentials: "Wrong email or password",
     email_taken: "This email is already registered",

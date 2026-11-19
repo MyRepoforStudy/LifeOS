@@ -22,6 +22,23 @@ function Test-Port([int]$Port) {
     return [bool](Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue)
 }
 
+function Test-LanBound([int]$Port) {
+    $listeners = Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue
+    return [bool]($listeners | Where-Object { $_.LocalAddress -in @('0.0.0.0', '::') })
+}
+
+# The web dev server must forward /api and /health to the API. A Vite that lost its
+# config (for example after vite.config.ts briefly disappeared) serves index.html instead.
+function Test-WebProxy {
+    try {
+        $answer = Invoke-RestMethod -Uri 'http://localhost:5173/health' -TimeoutSec 5
+        return ($answer.status -eq 'ok')
+    }
+    catch {
+        return $false
+    }
+}
+
 function Start-Window([string]$Title, [string]$Directory, [string]$Command) {
     $script = "`$host.UI.RawUI.WindowTitle = '$Title'; $Command"
     Start-Process powershell -WorkingDirectory $Directory -ArgumentList @('-NoExit', '-NoProfile', '-Command', $script) | Out-Null
@@ -73,19 +90,49 @@ else {
 }
 
 # 5. Web client on http://localhost:5173 (it forwards /api to the API).
+$startedWeb = $false
 if (Test-Port 5173) {
-    Write-Host 'Port 5173 is already in use: the web client seems to be running.'
+    if (-not (Test-WebProxy)) {
+        Write-Warning "Port 5173 is busy, but that server does not forward /api to the API. Close the 'LifeOS Web' window (or the program on port 5173) and run this script again."
+    }
+    elseif ($Lan -and -not (Test-LanBound 5173)) {
+        Write-Warning "The web client is running for this computer only. Close the 'LifeOS Web' window and run this script with -Lan again."
+    }
+    else {
+        Write-Host 'The web client is already running.'
+    }
 }
 else {
     $task = if ($Lan) { 'dev:lan' } else { 'dev' }
     Start-Window 'LifeOS Web' (Join-Path $Root 'web') "& '$npm' run $task"
+    $startedWeb = $true
+}
+
+# 6. Wait until the whole chain browser -> Vite -> API -> database answers.
+if ($startedWeb) {
+    $ready = $false
+    for ($i = 0; $i -lt 60 -and -not $ready; $i++) {
+        Start-Sleep -Milliseconds 500
+        $ready = Test-WebProxy
+    }
+    if (-not $ready) {
+        Write-Warning "The web client does not answer through http://localhost:5173/health yet. Check the 'LifeOS API' and 'LifeOS Web' windows for errors."
+    }
 }
 
 Write-Host ''
-Write-Host 'LifeOS is starting. Open http://localhost:5173 in a few seconds.'
+if (Test-WebProxy) { Write-Host 'LifeOS is ready: http://localhost:5173' }
+
 if ($Lan) {
     $addresses = Get-NetIPAddress -AddressFamily IPv4 -ErrorAction SilentlyContinue |
         Where-Object { $_.IPAddress -notlike '127.*' -and $_.IPAddress -notlike '169.254.*' } |
         Select-Object -ExpandProperty IPAddress
     foreach ($address in $addresses) { Write-Host "From the phone (same Wi-Fi): http://${address}:5173" }
+    $public = Get-NetConnectionProfile -ErrorAction SilentlyContinue | Where-Object { $_.NetworkCategory -eq 'Public' }
+    foreach ($network in $public) {
+        $hint = "Wi-Fi '$($network.Name)' is marked as a Public network, and Windows blocks connections from the phone. " +
+            'Make it Private (Settings > Network & internet > Wi-Fi > the network > Network profile type: Private) ' +
+            'and allow Node.js when Windows Firewall asks.'
+        Write-Warning $hint
+    }
 }

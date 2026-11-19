@@ -157,6 +157,7 @@ export const ru = {
   errors: {
     generic: "Что-то пошло не так. Попробуй ещё раз.",
     network_error: "Нет связи с сервером",
+    api_unavailable: "Сервер API недоступен. Проверь, что он запущен.",
     session_expired: "Сессия истекла, войди снова",
     invalid_credentials: "Неверный email или пароль",
     email_taken: "Этот email уже зарегистрирован",

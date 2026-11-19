@@ -243,6 +243,16 @@ export class ApiClient {
     }
     if (response.ok) return data as T;
     const error = (data as ErrorBody | undefined)?.error;
+    if (!error) {
+      // Every API error carries {"error": {...}}. Anything else came from something in
+      // between (dev proxy, missing route, crashed server): say the API is unavailable.
+      const unavailable = response.status === 404 || response.status >= 500;
+      throw new ApiError(
+        response.status,
+        unavailable ? "api_unavailable" : `http_${response.status}`,
+        response.statusText || "Request failed",
+      );
+    }
     throw new ApiError(
       response.status,
       error?.code ?? `http_${response.status}`,
