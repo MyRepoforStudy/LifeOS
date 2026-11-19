@@ -61,20 +61,23 @@ py -3.14 -m venv .venv
 
 ```powershell
 cd web
-npm install
-npm run dev        # http://localhost:5173, запросы /api уходят на :8000
-npm test           # тесты API-клиента
-npm run build      # проверка типов и сборка PWA в web/dist
+npm.cmd install
+npm.cmd run dev    # http://localhost:5173, запросы /api уходят на :8000
+npm.cmd test       # тесты API-клиента
+npm.cmd run build  # проверка типов и сборка PWA в web/dist
 ```
 
-**С телефона.** Запусти `npm run dev:lan` и открой на телефоне `http://<IP компьютера>:5173`.
+`npm.cmd` вместо `npm`: в Windows PowerShell по умолчанию запрещён запуск скриптов,
+и обычный `npm` (это `npm.ps1`) выдаёт ошибку.
+
+**С телефона.** Запусти `npm.cmd run dev:lan` и открой на телефоне `http://<IP компьютера>:5173`.
 Телефон и компьютер должны быть в одной сети Wi-Fi. При первом запуске Windows может
 спросить, разрешить ли Node.js доступ к частной сети — разреши. Так приложение работает
 как сайт. Чтобы установить его на главный экран и получать уведомления, нужен HTTPS:
 это даст Tailscale или сервер, и этим займёмся на этапе деплоя.
 
 **Типы API.** После изменения бэкенда обнови типы клиента:
-`backend\.venv\Scripts\python backend\scripts\export_openapi.py`, затем `npm run api:types` в `web`.
+`backend\.venv\Scripts\python backend\scripts\export_openapi.py`, затем `npm.cmd run api:types` в `web`.
 
 `devdb.ps1 init` создаёт кластер в `%LOCALAPPDATA%\LifeOS\pgdata`, роль `lifeos`
 и базы `lifeos` и `lifeos_test`. Случайные пароли он записывает в `backend/.env`,
