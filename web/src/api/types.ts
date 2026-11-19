@@ -20,6 +20,33 @@ export type SkipResult = Schemas["SkipOut"];
 export type UndoResult = Schemas["UndoOut"];
 export type PlayerXp = Schemas["PlayerXpOut"];
 
+export type Habit = Schemas["HabitOut"];
+export type HabitDetail = Schemas["HabitDetailOut"];
+export type HabitDay = Schemas["HabitDayOut"];
+export type HabitCompletion = Schemas["HabitCompletionOut"];
+export type HabitUndo = Schemas["HabitUndoOut"];
+export type HabitFrequency = Schemas["HabitFrequency"];
+export type Achievement = Schemas["AchievementOut"];
+export type Rarity = Schemas["Rarity"];
+export type AchievementCategory = Schemas["AchievementCategory"];
+
+/** What a completion (quest or habit) reports back for celebrations. */
+export interface Reward {
+  xp_awarded: number;
+  xp_limit_reason: XpLimitReason | null;
+  player: PlayerXp;
+  achievements_unlocked?: Achievement[];
+}
+
+export interface HabitDraft {
+  title: string;
+  description?: string | null;
+  category: QuestCategory;
+  frequency: HabitFrequency;
+  weekdays?: number[] | null;
+  times_per_week?: number | null;
+}
+
 export type QuestType = Schemas["QuestType"];
 export type QuestCategory = Schemas["QuestCategory"];
 export type AttributeType = Schemas["AttributeType"];

@@ -1,6 +1,6 @@
 import uuid
 from datetime import date, datetime
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import (
     AfterValidator,
@@ -16,13 +16,16 @@ from pydantic import (
 
 from app.domain.dates import validate_timezone
 from app.domain.enums import (
+    AchievementCategory,
     Activity,
     AttributeType,
     Difficulty,
     EffectiveQuestStatus,
+    HabitFrequency,
     OccurrenceStatus,
     QuestCategory,
     QuestType,
+    Rarity,
     XpLimitReason,
 )
 
@@ -166,6 +169,27 @@ class LevelTableOut(BaseModel):
     levels: list[LevelRowOut]
 
 
+# --- achievements ---------------------------------------------------------------------
+
+
+class AchievementProgress(BaseModel):
+    current: int
+    target: int
+
+
+class AchievementOut(BaseModel):
+    code: str
+    title: str
+    description: str
+    category: AchievementCategory
+    rarity: Rarity
+    icon: str
+    xp_reward: int
+    unlocked: bool
+    unlocked_at: datetime | None
+    progress: AchievementProgress
+
+
 # --- quests ---------------------------------------------------------------------------
 
 
@@ -294,6 +318,7 @@ class CompletionOut(BaseModel):
     xp_awarded: int
     xp_limit_reason: XpLimitReason | None
     player: PlayerXpOut
+    achievements_unlocked: list[AchievementOut] = Field(default_factory=list)
 
 
 class SkipOut(BaseModel):
@@ -304,5 +329,92 @@ class SkipOut(BaseModel):
 class UndoOut(BaseModel):
     quest: QuestOut
     occurrence: OccurrenceOut
+    xp_reverted: int
+    player: PlayerXpOut
+
+
+# --- habits ---------------------------------------------------------------------------
+
+
+class HabitCreateIn(InputModel):
+    title: Title
+    description: Annotated[str, StringConstraints(max_length=5000)] | None = None
+    category: QuestCategory
+    attribute_types: list[AttributeType] | None = Field(
+        default=None, description="Defaults to the attribute of the category"
+    )
+    frequency: HabitFrequency = HabitFrequency.DAILY
+    weekdays: Weekdays | None = Field(default=None, description="Required for frequency=weekdays")
+    times_per_week: int | None = Field(default=None, ge=1, le=7, description="Required for frequency=weekly")
+
+    @model_validator(mode="after")
+    def _schedule(self) -> "HabitCreateIn":
+        if (self.frequency == HabitFrequency.WEEKDAYS) != (self.weekdays is not None):
+            raise ValueError("weekdays are required for frequency=weekdays and allowed only there")
+        if (self.frequency == HabitFrequency.WEEKLY) != (self.times_per_week is not None):
+            raise ValueError("times_per_week is required for frequency=weekly and allowed only there")
+        if self.attribute_types is not None and len(set(self.attribute_types)) != len(self.attribute_types):
+            raise ValueError("attribute_types must be unique")
+        return self
+
+
+class HabitUpdateIn(InputModel):
+    """The schedule is fixed: changing it would rewrite the streak history."""
+
+    title: Title | None = None
+    description: Annotated[str, StringConstraints(max_length=5000)] | None = None
+
+
+class HabitFreezeIn(InputModel):
+    day: date = Field(description="A missed day; for weekly habits the Monday of the missed week")
+
+
+class StreakOut(BaseModel):
+    unit: Literal["day", "week"]
+    current: int
+    best: int
+    last_completed_on: date | None
+
+
+class HabitOut(BaseModel):
+    id: uuid.UUID
+    title: str
+    description: str | None
+    category: QuestCategory
+    attribute_types: list[AttributeType]
+    frequency: HabitFrequency
+    weekdays: list[int] | None
+    times_per_week: int | None
+    xp_reward: int
+    is_active: bool
+    starts_on: date
+    created_at: datetime
+    required_today: bool = Field(description="Planned for today (weekly habits: always)")
+    done_today: bool
+    week_done: int | None = Field(description="Completions this week, weekly habits only")
+    streak: StreakOut
+    freezes_left: int = Field(description="Freezes left this month")
+    freezable: list[date] = Field(description="Missed days (weeks) that can still be frozen")
+
+
+class HabitDayOut(BaseModel):
+    date: date
+    status: Literal["done", "frozen", "missed", "rest", "open", "before_start"]
+
+
+class HabitDetailOut(HabitOut):
+    history: list[HabitDayOut]
+
+
+class HabitCompletionOut(BaseModel):
+    habit: HabitOut
+    xp_awarded: int
+    xp_limit_reason: XpLimitReason | None
+    player: PlayerXpOut
+    achievements_unlocked: list[AchievementOut] = Field(default_factory=list)
+
+
+class HabitUndoOut(BaseModel):
+    habit: HabitOut
     xp_reverted: int
     player: PlayerXpOut

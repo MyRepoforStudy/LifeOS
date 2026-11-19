@@ -43,9 +43,10 @@ from app.schemas import (
     SkipOut,
     UndoOut,
 )
+from app.services.achievements import unlock_new
 from app.services.game_config import GameSettings
 from app.services.player import effective_timezone
-from app.services.xp import LedgerDraft, apply_xp, lock_profile, player_xp_out
+from app.services.xp import LedgerDraft, XpChange, apply_xp, lock_profile, player_xp_out
 
 # --- time windows ---------------------------------------------------------------------
 
@@ -453,7 +454,10 @@ async def complete_quest(
         )
         for attr, amount in split_xp(award.xp, attributes)
     ]
-    change = await apply_xp(session, profile, drafts, game.level_curve, now)
+    first = await apply_xp(session, profile, drafts, game.level_curve, now)
+    # Spec 12.3, step 9: new achievements are checked in the same transaction.
+    unlocked = await unlock_new(session, user, profile, now, game)
+    change = XpChange(first.total_before, profile.total_xp, first.level_before, profile.current_level)
     await session.flush()
     await session.refresh(quest)
     await session.refresh(occurrence)
@@ -463,6 +467,7 @@ async def complete_quest(
         xp_awarded=award.xp,
         xp_limit_reason=award.limit_reason,
         player=player_xp_out(change, game.level_curve),
+        achievements_unlocked=unlocked,
     )
 
 

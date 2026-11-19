@@ -991,6 +991,579 @@
         }
       }
     },
+    "/api/v1/habits": {
+      "get": {
+        "tags": [
+          "habits"
+        ],
+        "summary": "List Habits",
+        "operationId": "list_habits_api_v1_habits_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "include_archived",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Include Archived"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/HabitOut"
+                  },
+                  "title": "Response List Habits Api V1 Habits Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "habits"
+        ],
+        "summary": "Create Habit",
+        "description": "The XP per completion (15 by default) is fixed when the habit is created.",
+        "operationId": "create_habit_api_v1_habits_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HabitCreateIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HabitOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/habits/{habit_id}": {
+      "get": {
+        "tags": [
+          "habits"
+        ],
+        "summary": "Get Habit",
+        "operationId": "get_habit_api_v1_habits__habit_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "habit_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Habit Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HabitDetailOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "habits"
+        ],
+        "summary": "Update Habit",
+        "operationId": "update_habit_api_v1_habits__habit_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "habit_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Habit Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HabitUpdateIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HabitOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "habits"
+        ],
+        "summary": "Archive Habit",
+        "description": "Archives the habit; earned XP and the history stay.",
+        "operationId": "archive_habit_api_v1_habits__habit_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "habit_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Habit Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/habits/{habit_id}/streak": {
+      "get": {
+        "tags": [
+          "habits"
+        ],
+        "summary": "Get Streak",
+        "operationId": "get_streak_api_v1_habits__habit_id__streak_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "habit_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Habit Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreakOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/habits/{habit_id}/complete": {
+      "post": {
+        "tags": [
+          "habits"
+        ],
+        "summary": "Complete Habit",
+        "description": "Mark the habit done for today (local date). XP is awarded once per day.",
+        "operationId": "complete_habit_api_v1_habits__habit_id__complete_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "habit_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Habit Id"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HabitCompletionOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/habits/{habit_id}/undo": {
+      "post": {
+        "tags": [
+          "habits"
+        ],
+        "summary": "Undo Habit",
+        "operationId": "undo_habit_api_v1_habits__habit_id__undo_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "habit_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Habit Id"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HabitUndoOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/habits/{habit_id}/freeze": {
+      "post": {
+        "tags": [
+          "habits"
+        ],
+        "summary": "Freeze Missed Day",
+        "description": "Cover a missed day (a week for weekly habits) so the streak is kept. 2 per month by default.",
+        "operationId": "freeze_missed_day_api_v1_habits__habit_id__freeze_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "habit_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Habit Id"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HabitFreezeIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HabitOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/achievements": {
+      "get": {
+        "tags": [
+          "achievements"
+        ],
+        "summary": "List Achievements",
+        "description": "The whole catalog with the player's progress; unlocked ones carry unlocked_at.",
+        "operationId": "list_achievements_api_v1_achievements_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AchievementOut"
+                  },
+                  "type": "array",
+                  "title": "Response List Achievements Api V1 Achievements Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/achievements/unlocked": {
+      "get": {
+        "tags": [
+          "achievements"
+        ],
+        "summary": "List Unlocked",
+        "description": "Unlocked achievements, the most recent first.",
+        "operationId": "list_unlocked_api_v1_achievements_unlocked_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AchievementOut"
+                  },
+                  "type": "array",
+                  "title": "Response List Unlocked Api V1 Achievements Unlocked Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/config/levels": {
       "get": {
         "tags": [
@@ -1101,6 +1674,99 @@
           "password"
         ],
         "title": "AccountDeleteIn"
+      },
+      "AchievementCategory": {
+        "type": "string",
+        "enum": [
+          "consistency",
+          "learning",
+          "health",
+          "finance",
+          "career",
+          "level"
+        ],
+        "title": "AchievementCategory"
+      },
+      "AchievementOut": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "category": {
+            "$ref": "#/components/schemas/AchievementCategory"
+          },
+          "rarity": {
+            "$ref": "#/components/schemas/Rarity"
+          },
+          "icon": {
+            "type": "string",
+            "title": "Icon"
+          },
+          "xp_reward": {
+            "type": "integer",
+            "title": "Xp Reward"
+          },
+          "unlocked": {
+            "type": "boolean",
+            "title": "Unlocked"
+          },
+          "unlocked_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unlocked At"
+          },
+          "progress": {
+            "$ref": "#/components/schemas/AchievementProgress"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "title",
+          "description",
+          "category",
+          "rarity",
+          "icon",
+          "xp_reward",
+          "unlocked",
+          "unlocked_at",
+          "progress"
+        ],
+        "title": "AchievementOut"
+      },
+      "AchievementProgress": {
+        "properties": {
+          "current": {
+            "type": "integer",
+            "title": "Current"
+          },
+          "target": {
+            "type": "integer",
+            "title": "Target"
+          }
+        },
+        "type": "object",
+        "required": [
+          "current",
+          "target"
+        ],
+        "title": "AchievementProgress"
       },
       "Activity": {
         "type": "string",
@@ -1233,6 +1899,13 @@
           },
           "player": {
             "$ref": "#/components/schemas/PlayerXpOut"
+          },
+          "achievements_unlocked": {
+            "items": {
+              "$ref": "#/components/schemas/AchievementOut"
+            },
+            "type": "array",
+            "title": "Achievements Unlocked"
           }
         },
         "type": "object",
@@ -1299,6 +1972,519 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "HabitCompletionOut": {
+        "properties": {
+          "habit": {
+            "$ref": "#/components/schemas/HabitOut"
+          },
+          "xp_awarded": {
+            "type": "integer",
+            "title": "Xp Awarded"
+          },
+          "xp_limit_reason": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/XpLimitReason"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "player": {
+            "$ref": "#/components/schemas/PlayerXpOut"
+          },
+          "achievements_unlocked": {
+            "items": {
+              "$ref": "#/components/schemas/AchievementOut"
+            },
+            "type": "array",
+            "title": "Achievements Unlocked"
+          }
+        },
+        "type": "object",
+        "required": [
+          "habit",
+          "xp_awarded",
+          "xp_limit_reason",
+          "player"
+        ],
+        "title": "HabitCompletionOut"
+      },
+      "HabitCreateIn": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 5000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "category": {
+            "$ref": "#/components/schemas/QuestCategory"
+          },
+          "attribute_types": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/AttributeType"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Attribute Types",
+            "description": "Defaults to the attribute of the category"
+          },
+          "frequency": {
+            "$ref": "#/components/schemas/HabitFrequency",
+            "default": "daily"
+          },
+          "weekdays": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weekdays",
+            "description": "Required for frequency=weekdays"
+          },
+          "times_per_week": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 7.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Times Per Week",
+            "description": "Required for frequency=weekly"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "title",
+          "category"
+        ],
+        "title": "HabitCreateIn"
+      },
+      "HabitDayOut": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "done",
+              "frozen",
+              "missed",
+              "rest",
+              "open",
+              "before_start"
+            ],
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date",
+          "status"
+        ],
+        "title": "HabitDayOut"
+      },
+      "HabitDetailOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "category": {
+            "$ref": "#/components/schemas/QuestCategory"
+          },
+          "attribute_types": {
+            "items": {
+              "$ref": "#/components/schemas/AttributeType"
+            },
+            "type": "array",
+            "title": "Attribute Types"
+          },
+          "frequency": {
+            "$ref": "#/components/schemas/HabitFrequency"
+          },
+          "weekdays": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weekdays"
+          },
+          "times_per_week": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Times Per Week"
+          },
+          "xp_reward": {
+            "type": "integer",
+            "title": "Xp Reward"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "starts_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Starts On"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "required_today": {
+            "type": "boolean",
+            "title": "Required Today",
+            "description": "Planned for today (weekly habits: always)"
+          },
+          "done_today": {
+            "type": "boolean",
+            "title": "Done Today"
+          },
+          "week_done": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Week Done",
+            "description": "Completions this week, weekly habits only"
+          },
+          "streak": {
+            "$ref": "#/components/schemas/StreakOut"
+          },
+          "freezes_left": {
+            "type": "integer",
+            "title": "Freezes Left",
+            "description": "Freezes left this month"
+          },
+          "freezable": {
+            "items": {
+              "type": "string",
+              "format": "date"
+            },
+            "type": "array",
+            "title": "Freezable",
+            "description": "Missed days (weeks) that can still be frozen"
+          },
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/HabitDayOut"
+            },
+            "type": "array",
+            "title": "History"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "description",
+          "category",
+          "attribute_types",
+          "frequency",
+          "weekdays",
+          "times_per_week",
+          "xp_reward",
+          "is_active",
+          "starts_on",
+          "created_at",
+          "required_today",
+          "done_today",
+          "week_done",
+          "streak",
+          "freezes_left",
+          "freezable",
+          "history"
+        ],
+        "title": "HabitDetailOut"
+      },
+      "HabitFreezeIn": {
+        "properties": {
+          "day": {
+            "type": "string",
+            "format": "date",
+            "title": "Day",
+            "description": "A missed day; for weekly habits the Monday of the missed week"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "day"
+        ],
+        "title": "HabitFreezeIn"
+      },
+      "HabitFrequency": {
+        "type": "string",
+        "enum": [
+          "daily",
+          "weekdays",
+          "weekly"
+        ],
+        "title": "HabitFrequency"
+      },
+      "HabitOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "category": {
+            "$ref": "#/components/schemas/QuestCategory"
+          },
+          "attribute_types": {
+            "items": {
+              "$ref": "#/components/schemas/AttributeType"
+            },
+            "type": "array",
+            "title": "Attribute Types"
+          },
+          "frequency": {
+            "$ref": "#/components/schemas/HabitFrequency"
+          },
+          "weekdays": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weekdays"
+          },
+          "times_per_week": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Times Per Week"
+          },
+          "xp_reward": {
+            "type": "integer",
+            "title": "Xp Reward"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "starts_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Starts On"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "required_today": {
+            "type": "boolean",
+            "title": "Required Today",
+            "description": "Planned for today (weekly habits: always)"
+          },
+          "done_today": {
+            "type": "boolean",
+            "title": "Done Today"
+          },
+          "week_done": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Week Done",
+            "description": "Completions this week, weekly habits only"
+          },
+          "streak": {
+            "$ref": "#/components/schemas/StreakOut"
+          },
+          "freezes_left": {
+            "type": "integer",
+            "title": "Freezes Left",
+            "description": "Freezes left this month"
+          },
+          "freezable": {
+            "items": {
+              "type": "string",
+              "format": "date"
+            },
+            "type": "array",
+            "title": "Freezable",
+            "description": "Missed days (weeks) that can still be frozen"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "description",
+          "category",
+          "attribute_types",
+          "frequency",
+          "weekdays",
+          "times_per_week",
+          "xp_reward",
+          "is_active",
+          "starts_on",
+          "created_at",
+          "required_today",
+          "done_today",
+          "week_done",
+          "streak",
+          "freezes_left",
+          "freezable"
+        ],
+        "title": "HabitOut"
+      },
+      "HabitUndoOut": {
+        "properties": {
+          "habit": {
+            "$ref": "#/components/schemas/HabitOut"
+          },
+          "xp_reverted": {
+            "type": "integer",
+            "title": "Xp Reverted"
+          },
+          "player": {
+            "$ref": "#/components/schemas/PlayerXpOut"
+          }
+        },
+        "type": "object",
+        "required": [
+          "habit",
+          "xp_reverted",
+          "player"
+        ],
+        "title": "HabitUndoOut"
+      },
+      "HabitUpdateIn": {
+        "properties": {
+          "title": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 5000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "HabitUpdateIn",
+        "description": "The schedule is fixed: changing it would rewrite the streak history."
       },
       "LedgerEntryOut": {
         "properties": {
@@ -2446,6 +3632,16 @@
         "title": "QuestUpdateIn",
         "description": "Only descriptive fields can change; type, difficulty and reward are fixed at creation."
       },
+      "Rarity": {
+        "type": "string",
+        "enum": [
+          "common",
+          "rare",
+          "epic",
+          "legendary"
+        ],
+        "title": "Rarity"
+      },
       "RefreshIn": {
         "properties": {
           "refresh_token": {
@@ -2581,6 +3777,18 @@
             "minimum": 0.0,
             "title": "Simple Task Daily Limit",
             "default": 5
+          },
+          "habit_daily_limit": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Habit Daily Limit",
+            "default": 10
+          },
+          "streak_freezes_per_month": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Streak Freezes Per Month",
+            "default": 2
           }
         },
         "type": "object",
@@ -2657,6 +3865,46 @@
           "xp_by_attribute"
         ],
         "title": "StatisticsOut"
+      },
+      "StreakOut": {
+        "properties": {
+          "unit": {
+            "type": "string",
+            "enum": [
+              "day",
+              "week"
+            ],
+            "title": "Unit"
+          },
+          "current": {
+            "type": "integer",
+            "title": "Current"
+          },
+          "best": {
+            "type": "integer",
+            "title": "Best"
+          },
+          "last_completed_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Completed On"
+          }
+        },
+        "type": "object",
+        "required": [
+          "unit",
+          "current",
+          "best",
+          "last_completed_on"
+        ],
+        "title": "StreakOut"
       },
       "TokenPairOut": {
         "properties": {
@@ -2784,7 +4032,8 @@
         "type": "string",
         "enum": [
           "simple_task_daily_limit",
-          "learning_daily_cap"
+          "learning_daily_cap",
+          "habit_daily_limit"
         ],
         "title": "XpLimitReason"
       }

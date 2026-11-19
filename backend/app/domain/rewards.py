@@ -25,6 +25,10 @@ class RewardRules(BaseModel, frozen=True):
     challenge_multiplier: float = Field(default=2.0, ge=1.0)
     # Only the first N simple tasks per local day give XP.
     simple_task_daily_limit: int = Field(default=5, ge=0)
+    # Only the first N habit completions per local day give XP.
+    habit_daily_limit: int = Field(default=10, ge=0)
+    # Missed days (or weeks) per calendar month that can be covered to keep a streak.
+    streak_freezes_per_month: int = Field(default=2, ge=0)
 
     def task_xp(self, difficulty: Difficulty) -> int:
         return {

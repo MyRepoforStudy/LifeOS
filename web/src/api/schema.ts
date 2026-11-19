@@ -276,6 +276,163 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/habits": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Habits */
+        get: operations["list_habits_api_v1_habits_get"];
+        put?: never;
+        /**
+         * Create Habit
+         * @description The XP per completion (15 by default) is fixed when the habit is created.
+         */
+        post: operations["create_habit_api_v1_habits_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/habits/{habit_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Habit */
+        get: operations["get_habit_api_v1_habits__habit_id__get"];
+        put?: never;
+        post?: never;
+        /**
+         * Archive Habit
+         * @description Archives the habit; earned XP and the history stay.
+         */
+        delete: operations["archive_habit_api_v1_habits__habit_id__delete"];
+        options?: never;
+        head?: never;
+        /** Update Habit */
+        patch: operations["update_habit_api_v1_habits__habit_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/habits/{habit_id}/streak": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Streak */
+        get: operations["get_streak_api_v1_habits__habit_id__streak_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/habits/{habit_id}/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Complete Habit
+         * @description Mark the habit done for today (local date). XP is awarded once per day.
+         */
+        post: operations["complete_habit_api_v1_habits__habit_id__complete_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/habits/{habit_id}/undo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Undo Habit */
+        post: operations["undo_habit_api_v1_habits__habit_id__undo_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/habits/{habit_id}/freeze": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Freeze Missed Day
+         * @description Cover a missed day (a week for weekly habits) so the streak is kept. 2 per month by default.
+         */
+        post: operations["freeze_missed_day_api_v1_habits__habit_id__freeze_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/achievements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Achievements
+         * @description The whole catalog with the player's progress; unlocked ones carry unlocked_at.
+         */
+        get: operations["list_achievements_api_v1_achievements_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/achievements/unlocked": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Unlocked
+         * @description Unlocked achievements, the most recent first.
+         */
+        get: operations["list_unlocked_api_v1_achievements_unlocked_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/config/levels": {
         parameters: {
             query?: never;
@@ -340,6 +497,38 @@ export interface components {
             password: string;
         };
         /**
+         * AchievementCategory
+         * @enum {string}
+         */
+        AchievementCategory: "consistency" | "learning" | "health" | "finance" | "career" | "level";
+        /** AchievementOut */
+        AchievementOut: {
+            /** Code */
+            code: string;
+            /** Title */
+            title: string;
+            /** Description */
+            description: string;
+            category: components["schemas"]["AchievementCategory"];
+            rarity: components["schemas"]["Rarity"];
+            /** Icon */
+            icon: string;
+            /** Xp Reward */
+            xp_reward: number;
+            /** Unlocked */
+            unlocked: boolean;
+            /** Unlocked At */
+            unlocked_at: string | null;
+            progress: components["schemas"]["AchievementProgress"];
+        };
+        /** AchievementProgress */
+        AchievementProgress: {
+            /** Current */
+            current: number;
+            /** Target */
+            target: number;
+        };
+        /**
          * Activity
          * @description What the quest is about; decides which reward rule applies.
          * @enum {string}
@@ -388,6 +577,8 @@ export interface components {
             xp_awarded: number;
             xp_limit_reason: components["schemas"]["XpLimitReason"] | null;
             player: components["schemas"]["PlayerXpOut"];
+            /** Achievements Unlocked */
+            achievements_unlocked?: components["schemas"]["AchievementOut"][];
         };
         /** DailyXp */
         DailyXp: {
@@ -414,6 +605,201 @@ export interface components {
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /** HabitCompletionOut */
+        HabitCompletionOut: {
+            habit: components["schemas"]["HabitOut"];
+            /** Xp Awarded */
+            xp_awarded: number;
+            xp_limit_reason: components["schemas"]["XpLimitReason"] | null;
+            player: components["schemas"]["PlayerXpOut"];
+            /** Achievements Unlocked */
+            achievements_unlocked?: components["schemas"]["AchievementOut"][];
+        };
+        /** HabitCreateIn */
+        HabitCreateIn: {
+            /** Title */
+            title: string;
+            /** Description */
+            description?: string | null;
+            category: components["schemas"]["QuestCategory"];
+            /**
+             * Attribute Types
+             * @description Defaults to the attribute of the category
+             */
+            attribute_types?: components["schemas"]["AttributeType"][] | null;
+            /** @default daily */
+            frequency: components["schemas"]["HabitFrequency"];
+            /**
+             * Weekdays
+             * @description Required for frequency=weekdays
+             */
+            weekdays?: number[] | null;
+            /**
+             * Times Per Week
+             * @description Required for frequency=weekly
+             */
+            times_per_week?: number | null;
+        };
+        /** HabitDayOut */
+        HabitDayOut: {
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "done" | "frozen" | "missed" | "rest" | "open" | "before_start";
+        };
+        /** HabitDetailOut */
+        HabitDetailOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Title */
+            title: string;
+            /** Description */
+            description: string | null;
+            category: components["schemas"]["QuestCategory"];
+            /** Attribute Types */
+            attribute_types: components["schemas"]["AttributeType"][];
+            frequency: components["schemas"]["HabitFrequency"];
+            /** Weekdays */
+            weekdays: number[] | null;
+            /** Times Per Week */
+            times_per_week: number | null;
+            /** Xp Reward */
+            xp_reward: number;
+            /** Is Active */
+            is_active: boolean;
+            /**
+             * Starts On
+             * Format: date
+             */
+            starts_on: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Required Today
+             * @description Planned for today (weekly habits: always)
+             */
+            required_today: boolean;
+            /** Done Today */
+            done_today: boolean;
+            /**
+             * Week Done
+             * @description Completions this week, weekly habits only
+             */
+            week_done: number | null;
+            streak: components["schemas"]["StreakOut"];
+            /**
+             * Freezes Left
+             * @description Freezes left this month
+             */
+            freezes_left: number;
+            /**
+             * Freezable
+             * @description Missed days (weeks) that can still be frozen
+             */
+            freezable: string[];
+            /** History */
+            history: components["schemas"]["HabitDayOut"][];
+        };
+        /** HabitFreezeIn */
+        HabitFreezeIn: {
+            /**
+             * Day
+             * Format: date
+             * @description A missed day; for weekly habits the Monday of the missed week
+             */
+            day: string;
+        };
+        /**
+         * HabitFrequency
+         * @enum {string}
+         */
+        HabitFrequency: "daily" | "weekdays" | "weekly";
+        /** HabitOut */
+        HabitOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Title */
+            title: string;
+            /** Description */
+            description: string | null;
+            category: components["schemas"]["QuestCategory"];
+            /** Attribute Types */
+            attribute_types: components["schemas"]["AttributeType"][];
+            frequency: components["schemas"]["HabitFrequency"];
+            /** Weekdays */
+            weekdays: number[] | null;
+            /** Times Per Week */
+            times_per_week: number | null;
+            /** Xp Reward */
+            xp_reward: number;
+            /** Is Active */
+            is_active: boolean;
+            /**
+             * Starts On
+             * Format: date
+             */
+            starts_on: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Required Today
+             * @description Planned for today (weekly habits: always)
+             */
+            required_today: boolean;
+            /** Done Today */
+            done_today: boolean;
+            /**
+             * Week Done
+             * @description Completions this week, weekly habits only
+             */
+            week_done: number | null;
+            streak: components["schemas"]["StreakOut"];
+            /**
+             * Freezes Left
+             * @description Freezes left this month
+             */
+            freezes_left: number;
+            /**
+             * Freezable
+             * @description Missed days (weeks) that can still be frozen
+             */
+            freezable: string[];
+        };
+        /** HabitUndoOut */
+        HabitUndoOut: {
+            habit: components["schemas"]["HabitOut"];
+            /** Xp Reverted */
+            xp_reverted: number;
+            player: components["schemas"]["PlayerXpOut"];
+        };
+        /**
+         * HabitUpdateIn
+         * @description The schedule is fixed: changing it would rewrite the streak history.
+         */
+        HabitUpdateIn: {
+            /** Title */
+            title?: string | null;
+            /** Description */
+            description?: string | null;
         };
         /** LedgerEntryOut */
         LedgerEntryOut: {
@@ -761,6 +1147,11 @@ export interface components {
             /** Checklist */
             checklist?: components["schemas"]["ChecklistItem"][] | null;
         };
+        /**
+         * Rarity
+         * @enum {string}
+         */
+        Rarity: "common" | "rare" | "epic" | "legendary";
         /** RefreshIn */
         RefreshIn: {
             /** Refresh Token */
@@ -855,6 +1246,16 @@ export interface components {
              * @default 5
              */
             simple_task_daily_limit: number;
+            /**
+             * Habit Daily Limit
+             * @default 10
+             */
+            habit_daily_limit: number;
+            /**
+             * Streak Freezes Per Month
+             * @default 2
+             */
+            streak_freezes_per_month: number;
         };
         /** SkipOut */
         SkipOut: {
@@ -887,6 +1288,20 @@ export interface components {
             xp_by_attribute: {
                 [key: string]: number;
             };
+        };
+        /** StreakOut */
+        StreakOut: {
+            /**
+             * Unit
+             * @enum {string}
+             */
+            unit: "day" | "week";
+            /** Current */
+            current: number;
+            /** Best */
+            best: number;
+            /** Last Completed On */
+            last_completed_on: string | null;
         };
         /** TokenPairOut */
         TokenPairOut: {
@@ -937,7 +1352,7 @@ export interface components {
          * XpLimitReason
          * @enum {string}
          */
-        XpLimitReason: "simple_task_daily_limit" | "learning_daily_cap";
+        XpLimitReason: "simple_task_daily_limit" | "learning_daily_cap" | "habit_daily_limit";
     };
     responses: never;
     parameters: never;
@@ -1511,6 +1926,341 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_habits_api_v1_habits_get: {
+        parameters: {
+            query?: {
+                include_archived?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HabitOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_habit_api_v1_habits_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Idempotency-Key"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HabitCreateIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HabitOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_habit_api_v1_habits__habit_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                habit_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HabitDetailOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    archive_habit_api_v1_habits__habit_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                habit_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_habit_api_v1_habits__habit_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                habit_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HabitUpdateIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HabitOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_streak_api_v1_habits__habit_id__streak_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                habit_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StreakOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    complete_habit_api_v1_habits__habit_id__complete_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Idempotency-Key"?: string | null;
+            };
+            path: {
+                habit_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HabitCompletionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    undo_habit_api_v1_habits__habit_id__undo_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Idempotency-Key"?: string | null;
+            };
+            path: {
+                habit_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HabitUndoOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    freeze_missed_day_api_v1_habits__habit_id__freeze_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Idempotency-Key"?: string | null;
+            };
+            path: {
+                habit_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HabitFreezeIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HabitOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_achievements_api_v1_achievements_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AchievementOut"][];
+                };
+            };
+        };
+    };
+    list_unlocked_api_v1_achievements_unlocked_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AchievementOut"][];
                 };
             };
         };

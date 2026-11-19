@@ -29,7 +29,8 @@ API = "/api/v1"
 # Wednesday; the ISO week starts on Monday 2026-11-16.
 START = datetime(2026, 11, 18, 9, 0, tzinfo=UTC)
 TABLES = (
-    "users, refresh_tokens, player_profiles, attributes, xp_ledger, quests, quest_occurrences, idempotency_keys"
+    "users, refresh_tokens, player_profiles, attributes, xp_ledger, quests, quest_occurrences, idempotency_keys, "
+    "habits, habit_logs, user_achievements"
 )
 
 
@@ -58,6 +59,9 @@ def database_url() -> str:
     config.attributes["database_url"] = url
     config.attributes["configure_logger"] = False
     command.upgrade(config, "head")
+    # Achievements add XP to almost every first action. Tests that check exact XP
+    # amounts run without them; test_achievements.py turns them on explicitly.
+    asyncio.run(_execute(url, "UPDATE achievements SET is_active = false"))
     return url
 
 

@@ -1,7 +1,13 @@
 import { ApiClient } from "./client";
 import type {
+  Achievement,
   Attribute,
   Completion,
+  Habit,
+  HabitCompletion,
+  HabitDetail,
+  HabitDraft,
+  HabitUndo,
   LevelTable,
   Profile,
   ProfileUpdate,
@@ -55,6 +61,24 @@ export const api = {
     client.request<SkipResult>("POST", `/quests/${id}/skip`, { idempotencyKey }),
   undoQuest: (id: string, idempotencyKey: string) =>
     client.request<UndoResult>("POST", `/quests/${id}/undo`, { idempotencyKey }),
+
+  habits: (includeArchived = false) =>
+    client.request<Habit[]>("GET", "/habits", { query: { include_archived: includeArchived } }),
+  habit: (id: string) => client.request<HabitDetail>("GET", `/habits/${id}`),
+  createHabit: (draft: HabitDraft, idempotencyKey: string) =>
+    client.request<Habit>("POST", "/habits", { body: draft, idempotencyKey }),
+  updateHabit: (id: string, patch: { title?: string; description?: string | null }) =>
+    client.request<Habit>("PATCH", `/habits/${id}`, { body: patch }),
+  archiveHabit: (id: string) => client.request<void>("DELETE", `/habits/${id}`),
+  completeHabit: (id: string, idempotencyKey: string) =>
+    client.request<HabitCompletion>("POST", `/habits/${id}/complete`, { idempotencyKey }),
+  undoHabit: (id: string, idempotencyKey: string) =>
+    client.request<HabitUndo>("POST", `/habits/${id}/undo`, { idempotencyKey }),
+  freezeHabit: (id: string, day: string, idempotencyKey: string) =>
+    client.request<Habit>("POST", `/habits/${id}/freeze`, { body: { day }, idempotencyKey }),
+
+  achievements: () => client.request<Achievement[]>("GET", "/achievements"),
+  unlockedAchievements: () => client.request<Achievement[]>("GET", "/achievements/unlocked"),
 
   levels: (upTo = 50) => client.request<LevelTable>("GET", "/config/levels", { query: { up_to: upTo }, auth: false }),
 };

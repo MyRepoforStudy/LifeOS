@@ -22,13 +22,17 @@ from sqlalchemy.dialects.postgresql import ARRAY, JSONB, UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 from app.domain.enums import (
+    AchievementCategory,
     Activity,
     AttributeType,
     Difficulty,
+    HabitFrequency,
+    HabitLogStatus,
     OccurrenceStatus,
     QuestCategory,
     QuestStatus,
     QuestType,
+    Rarity,
 )
 
 
@@ -251,3 +255,95 @@ class GameConfig(Base):
     key: Mapped[str] = mapped_column(String(50), primary_key=True)
     value: Mapped[dict[str, Any]] = mapped_column(JSONB)
     updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
+
+
+class Habit(Base):
+    """A recurring habit. The schedule is fixed at creation: the streak history depends on it."""
+
+    __tablename__ = "habits"
+    __table_args__ = (
+        CheckConstraint(_in("frequency", HabitFrequency), name="frequency_valid"),
+        CheckConstraint(_in("category", QuestCategory), name="category_valid"),
+        CheckConstraint("(frequency = 'weekdays') = (weekdays IS NOT NULL)", name="weekdays_match_frequency"),
+        CheckConstraint(
+            "(frequency = 'weekly') = (times_per_week IS NOT NULL) AND "
+            "(times_per_week IS NULL OR times_per_week BETWEEN 1 AND 7)",
+            name="times_per_week_match_frequency",
+        ),
+        CheckConstraint("xp_reward >= 0", name="xp_reward_non_negative"),
+        Index("ix_habits_user_id_is_active", "user_id", "is_active"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=new_id)
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    title: Mapped[str] = mapped_column(String(200))
+    description: Mapped[str | None] = mapped_column(Text)
+    category: Mapped[str] = mapped_column(String(20))
+    attribute_types: Mapped[list[str]] = mapped_column(ARRAY(String(20)), server_default="{}")
+    frequency: Mapped[str] = mapped_column(String(20))
+    weekdays: Mapped[list[int] | None] = mapped_column(ARRAY(SmallInteger))
+    times_per_week: Mapped[int | None] = mapped_column(SmallInteger)
+    xp_reward: Mapped[int] = mapped_column(Integer)
+    # Local date the habit starts counting from (the creation day).
+    starts_on: Mapped[date]
+    is_active: Mapped[bool] = mapped_column(server_default=text("true"))
+    archived_at: Mapped[datetime | None]
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
+
+
+class HabitLog(Base):
+    """One local day of a habit: done, undone or frozen (a freeze of a weekly habit uses the week's Monday)."""
+
+    __tablename__ = "habit_logs"
+    __table_args__ = (
+        UniqueConstraint("habit_id", "completed_on"),
+        CheckConstraint(_in("status", HabitLogStatus), name="status_valid"),
+        CheckConstraint("xp_awarded >= 0", name="xp_awarded_non_negative"),
+        Index("ix_habit_logs_user_id_completed_on", "user_id", "completed_on"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=new_id)
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    habit_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("habits.id", ondelete="CASCADE"))
+    completed_on: Mapped[date]
+    status: Mapped[str] = mapped_column(String(20))
+    completed_at: Mapped[datetime | None]
+    xp_awarded: Mapped[int] = mapped_column(Integer, server_default="0")
+    completion_count: Mapped[int] = mapped_column(Integer, server_default="0")
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
+
+
+class Achievement(Base):
+    """Catalog entry. `condition_config` is evaluated by services.achievements."""
+
+    __tablename__ = "achievements"
+    __table_args__ = (
+        CheckConstraint(_in("category", AchievementCategory), name="category_valid"),
+        CheckConstraint(_in("rarity", Rarity), name="rarity_valid"),
+        CheckConstraint("xp_reward >= 0", name="xp_reward_non_negative"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=new_id)
+    code: Mapped[str] = mapped_column(String(50), unique=True)
+    # English fallback; the client shows localized texts by `code`.
+    title: Mapped[str] = mapped_column(String(200))
+    description: Mapped[str] = mapped_column(Text)
+    category: Mapped[str] = mapped_column(String(20))
+    rarity: Mapped[str] = mapped_column(String(20))
+    icon: Mapped[str] = mapped_column(String(50))
+    xp_reward: Mapped[int] = mapped_column(Integer)
+    condition_config: Mapped[dict[str, Any]] = mapped_column(JSONB)
+    sort_order: Mapped[int] = mapped_column(Integer, server_default="0")
+    is_active: Mapped[bool] = mapped_column(server_default=text("true"))
+
+
+class UserAchievement(Base):
+    __tablename__ = "user_achievements"
+    __table_args__ = (UniqueConstraint("user_id", "achievement_id"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=new_id)
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    achievement_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("achievements.id", ondelete="CASCADE"))
+    unlocked_at: Mapped[datetime]
