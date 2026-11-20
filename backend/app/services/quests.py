@@ -44,6 +44,7 @@ from app.schemas import (
     UndoOut,
 )
 from app.services.achievements import unlock_new
+from app.services.cycles import resolve_goal
 from app.services.game_config import GameSettings
 from app.services.player import effective_timezone
 from app.services.xp import LedgerDraft, XpChange, apply_xp, lock_profile, player_xp_out
@@ -143,6 +144,7 @@ def quest_out(quest: Quest, occurrence: QuestOccurrence | None, tz: str, now: da
         weekdays=quest.weekdays,
         priority=quest.priority,
         checklist=[ChecklistItem(**item) for item in quest.checklist],
+        goal_id=quest.goal_id,
         starts_at=quest.starts_at,
         due_at=quest.due_at,
         completed_at=quest.completed_at,
@@ -213,6 +215,7 @@ async def create_quest(
     else:
         default = CATEGORY_DEFAULT_ATTRIBUTE[data.category]
         attributes = [default] if default else []
+    goal_id = (await resolve_goal(session, user.id, data.goal_id)).id if data.goal_id else None
 
     quest = Quest(
         id=new_id(),
@@ -239,6 +242,7 @@ async def create_quest(
         weekdays=data.weekdays,
         priority=data.priority,
         checklist=[item.model_dump() for item in data.checklist],
+        goal_id=goal_id,
         starts_at=starts_at,
         anchor_date=dates.local_date(tz, starts_at),
         due_at=data.due_at,
@@ -330,6 +334,8 @@ async def update_quest(
         quest.weekdays = data.weekdays
     if "checklist" in fields:
         quest.checklist = [item.model_dump() for item in data.checklist or []]
+    if "goal_id" in fields:
+        quest.goal_id = (await resolve_goal(session, user.id, data.goal_id)).id if data.goal_id else None
     await session.flush()
     await session.refresh(quest)
     return await _quest_view(session, quest, effective_timezone(user, now), now)

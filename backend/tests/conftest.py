@@ -30,7 +30,7 @@ API = "/api/v1"
 START = datetime(2026, 11, 18, 9, 0, tzinfo=UTC)
 TABLES = (
     "users, refresh_tokens, player_profiles, attributes, xp_ledger, quests, quest_occurrences, idempotency_keys, "
-    "habits, habit_logs, user_achievements"
+    "habits, habit_logs, user_achievements, life_cycles, cycle_goals"
 )
 
 

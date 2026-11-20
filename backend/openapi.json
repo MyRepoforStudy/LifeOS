@@ -1502,6 +1502,624 @@
         }
       }
     },
+    "/api/v1/cycles": {
+      "get": {
+        "tags": [
+          "cycles"
+        ],
+        "summary": "List Cycles",
+        "description": "All cycles, the newest first: the open one and the history.",
+        "operationId": "list_cycles_api_v1_cycles_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CycleSummaryOut"
+                  },
+                  "title": "Response List Cycles Api V1 Cycles Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "cycles"
+        ],
+        "summary": "Create Cycle",
+        "description": "Start a cycle of any length (7-366 days). Only one cycle can be open at a time.",
+        "operationId": "create_cycle_api_v1_cycles_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CycleCreateIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CycleOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cycles/current": {
+      "get": {
+        "tags": [
+          "cycles"
+        ],
+        "summary": "Current Cycle",
+        "description": "The open (active or paused) cycle, or null.",
+        "operationId": "current_cycle_api_v1_cycles_current_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/CycleOut"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Response Current Cycle Api V1 Cycles Current Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/cycles/{cycle_id}": {
+      "get": {
+        "tags": [
+          "cycles"
+        ],
+        "summary": "Get Cycle",
+        "operationId": "get_cycle_api_v1_cycles__cycle_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cycle_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Cycle Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CycleOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "cycles"
+        ],
+        "summary": "Update Cycle",
+        "operationId": "update_cycle_api_v1_cycles__cycle_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cycle_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Cycle Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CycleUpdateIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CycleOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "cycles"
+        ],
+        "summary": "Cancel Cycle",
+        "description": "Cancel the open cycle: it stays in the history, without a report or reward.",
+        "operationId": "cancel_cycle_api_v1_cycles__cycle_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cycle_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Cycle Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cycles/{cycle_id}/goals": {
+      "post": {
+        "tags": [
+          "cycles"
+        ],
+        "summary": "Add Goal",
+        "operationId": "add_goal_api_v1_cycles__cycle_id__goals_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cycle_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Cycle Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoalCreateIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CycleOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cycles/{cycle_id}/goals/{goal_id}": {
+      "patch": {
+        "tags": [
+          "cycles"
+        ],
+        "summary": "Update Goal",
+        "description": "current_value can be set only for manual goals; the others are counted.",
+        "operationId": "update_goal_api_v1_cycles__cycle_id__goals__goal_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cycle_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Cycle Id"
+            }
+          },
+          {
+            "name": "goal_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Goal Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoalUpdateIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CycleOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "cycles"
+        ],
+        "summary": "Delete Goal",
+        "operationId": "delete_goal_api_v1_cycles__cycle_id__goals__goal_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cycle_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Cycle Id"
+            }
+          },
+          {
+            "name": "goal_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Goal Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CycleOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cycles/{cycle_id}/pause": {
+      "post": {
+        "tags": [
+          "cycles"
+        ],
+        "summary": "Pause Cycle",
+        "description": "The paused days are added to the end date when the cycle resumes.",
+        "operationId": "pause_cycle_api_v1_cycles__cycle_id__pause_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cycle_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Cycle Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CycleOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cycles/{cycle_id}/resume": {
+      "post": {
+        "tags": [
+          "cycles"
+        ],
+        "summary": "Resume Cycle",
+        "operationId": "resume_cycle_api_v1_cycles__cycle_id__resume_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cycle_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Cycle Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CycleOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cycles/{cycle_id}/complete": {
+      "post": {
+        "tags": [
+          "cycles"
+        ],
+        "summary": "Complete Cycle",
+        "description": "Sum the cycle up: the report is saved as a snapshot. After the end date it gives\n200 XP x the share of goals done; finishing early gives no reward.",
+        "operationId": "complete_cycle_api_v1_cycles__cycle_id__complete_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cycle_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Cycle Id"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CycleCompletionOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/achievements": {
       "get": {
         "tags": [
@@ -1918,6 +2536,458 @@
         ],
         "title": "CompletionOut"
       },
+      "CycleCompletionOut": {
+        "properties": {
+          "cycle": {
+            "$ref": "#/components/schemas/CycleOut"
+          },
+          "xp_awarded": {
+            "type": "integer",
+            "title": "Xp Awarded"
+          },
+          "player": {
+            "$ref": "#/components/schemas/PlayerXpOut"
+          },
+          "achievements_unlocked": {
+            "items": {
+              "$ref": "#/components/schemas/AchievementOut"
+            },
+            "type": "array",
+            "title": "Achievements Unlocked"
+          }
+        },
+        "type": "object",
+        "required": [
+          "cycle",
+          "xp_awarded",
+          "player"
+        ],
+        "title": "CycleCompletionOut"
+      },
+      "CycleCreateIn": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 5000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "duration_days": {
+            "type": "integer",
+            "maximum": 366.0,
+            "minimum": 7.0,
+            "title": "Duration Days",
+            "description": "Any length: 30, 45, 66, 90, 120..."
+          },
+          "starts_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Starts On",
+            "description": "Local date; today by default, at most 30 days ahead"
+          },
+          "goals": {
+            "items": {
+              "$ref": "#/components/schemas/GoalCreateIn"
+            },
+            "type": "array",
+            "maxItems": 10,
+            "title": "Goals"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "title",
+          "duration_days"
+        ],
+        "title": "CycleCreateIn"
+      },
+      "CycleDisplayStatus": {
+        "type": "string",
+        "enum": [
+          "planned",
+          "active",
+          "paused",
+          "finished",
+          "completed",
+          "cancelled"
+        ],
+        "title": "CycleDisplayStatus"
+      },
+      "CycleOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "duration_days": {
+            "type": "integer",
+            "title": "Duration Days"
+          },
+          "starts_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Starts On"
+          },
+          "ends_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Ends On"
+          },
+          "status": {
+            "$ref": "#/components/schemas/CycleDisplayStatus"
+          },
+          "day_number": {
+            "type": "integer",
+            "title": "Day Number",
+            "description": "Active days lived so far, 0 before the start"
+          },
+          "days_left": {
+            "type": "integer",
+            "title": "Days Left"
+          },
+          "time_progress": {
+            "type": "number",
+            "title": "Time Progress"
+          },
+          "paused_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Paused On"
+          },
+          "paused_days": {
+            "type": "integer",
+            "title": "Paused Days"
+          },
+          "goals": {
+            "items": {
+              "$ref": "#/components/schemas/GoalOut"
+            },
+            "type": "array",
+            "title": "Goals"
+          },
+          "goals_done": {
+            "type": "integer",
+            "title": "Goals Done"
+          },
+          "goals_total": {
+            "type": "integer",
+            "title": "Goals Total"
+          },
+          "xp_in_cycle": {
+            "type": "integer",
+            "title": "Xp In Cycle"
+          },
+          "reached_end": {
+            "type": "boolean",
+            "title": "Reached End",
+            "description": "Summing up now gives the cycle reward"
+          },
+          "finished_early": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished Early"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "xp_awarded": {
+            "type": "integer",
+            "title": "Xp Awarded"
+          },
+          "report": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CycleReport"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "description",
+          "duration_days",
+          "starts_on",
+          "ends_on",
+          "status",
+          "day_number",
+          "days_left",
+          "time_progress",
+          "paused_on",
+          "paused_days",
+          "goals",
+          "goals_done",
+          "goals_total",
+          "xp_in_cycle",
+          "reached_end",
+          "finished_early",
+          "completed_at",
+          "xp_awarded",
+          "report"
+        ],
+        "title": "CycleOut"
+      },
+      "CycleReport": {
+        "properties": {
+          "starts_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Starts On"
+          },
+          "ends_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Ends On"
+          },
+          "duration_days": {
+            "type": "integer",
+            "title": "Duration Days"
+          },
+          "paused_days": {
+            "type": "integer",
+            "title": "Paused Days"
+          },
+          "finished_early": {
+            "type": "boolean",
+            "title": "Finished Early"
+          },
+          "goals": {
+            "items": {
+              "$ref": "#/components/schemas/ReportGoal"
+            },
+            "type": "array",
+            "title": "Goals"
+          },
+          "goals_done": {
+            "type": "integer",
+            "title": "Goals Done"
+          },
+          "goals_total": {
+            "type": "integer",
+            "title": "Goals Total"
+          },
+          "xp_total": {
+            "type": "integer",
+            "title": "Xp Total"
+          },
+          "attributes": {
+            "items": {
+              "$ref": "#/components/schemas/ReportAttribute"
+            },
+            "type": "array",
+            "title": "Attributes"
+          },
+          "learning_minutes": {
+            "type": "integer",
+            "title": "Learning Minutes"
+          },
+          "workouts": {
+            "type": "integer",
+            "title": "Workouts"
+          },
+          "quests_completed": {
+            "type": "integer",
+            "title": "Quests Completed"
+          },
+          "habit_checkins": {
+            "type": "integer",
+            "title": "Habit Checkins"
+          },
+          "active_days": {
+            "type": "integer",
+            "title": "Active Days"
+          },
+          "achievements": {
+            "items": {
+              "$ref": "#/components/schemas/ReportAchievement"
+            },
+            "type": "array",
+            "title": "Achievements"
+          },
+          "cycle_xp": {
+            "type": "integer",
+            "title": "Cycle Xp"
+          },
+          "recommendations": {
+            "items": {
+              "$ref": "#/components/schemas/Recommendation"
+            },
+            "type": "array",
+            "title": "Recommendations"
+          }
+        },
+        "type": "object",
+        "required": [
+          "starts_on",
+          "ends_on",
+          "duration_days",
+          "paused_days",
+          "finished_early",
+          "goals",
+          "goals_done",
+          "goals_total",
+          "xp_total",
+          "attributes",
+          "learning_minutes",
+          "workouts",
+          "quests_completed",
+          "habit_checkins",
+          "active_days",
+          "achievements",
+          "cycle_xp",
+          "recommendations"
+        ],
+        "title": "CycleReport"
+      },
+      "CycleSummaryOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "status": {
+            "$ref": "#/components/schemas/CycleDisplayStatus"
+          },
+          "starts_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Starts On"
+          },
+          "ends_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Ends On"
+          },
+          "duration_days": {
+            "type": "integer",
+            "title": "Duration Days"
+          },
+          "goals_done": {
+            "type": "integer",
+            "title": "Goals Done"
+          },
+          "goals_total": {
+            "type": "integer",
+            "title": "Goals Total"
+          },
+          "xp_awarded": {
+            "type": "integer",
+            "title": "Xp Awarded"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "status",
+          "starts_on",
+          "ends_on",
+          "duration_days",
+          "goals_done",
+          "goals_total",
+          "xp_awarded"
+        ],
+        "title": "CycleSummaryOut"
+      },
+      "CycleUpdateIn": {
+        "properties": {
+          "title": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 5000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "CycleUpdateIn"
+      },
       "DailyXp": {
         "properties": {
           "date": {
@@ -1959,6 +3029,186 @@
         ],
         "title": "EffectiveQuestStatus",
         "description": "Status shown to the client: the stored one plus time-based states."
+      },
+      "GoalCreateIn": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "category": {
+            "$ref": "#/components/schemas/QuestCategory"
+          },
+          "metric": {
+            "$ref": "#/components/schemas/GoalMetric",
+            "default": "manual"
+          },
+          "target_value": {
+            "type": "integer",
+            "maximum": 100000.0,
+            "minimum": 1.0,
+            "title": "Target Value",
+            "default": 1
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 30
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "title",
+          "category"
+        ],
+        "title": "GoalCreateIn"
+      },
+      "GoalMetric": {
+        "type": "string",
+        "enum": [
+          "manual",
+          "completions",
+          "minutes"
+        ],
+        "title": "GoalMetric"
+      },
+      "GoalOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "category": {
+            "$ref": "#/components/schemas/QuestCategory"
+          },
+          "metric": {
+            "$ref": "#/components/schemas/GoalMetric"
+          },
+          "target_value": {
+            "type": "integer",
+            "title": "Target Value"
+          },
+          "current_value": {
+            "type": "integer",
+            "title": "Current Value"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit"
+          },
+          "progress": {
+            "type": "number",
+            "title": "Progress"
+          },
+          "done": {
+            "type": "boolean",
+            "title": "Done"
+          },
+          "linked_quests": {
+            "type": "integer",
+            "title": "Linked Quests"
+          },
+          "linked_habits": {
+            "type": "integer",
+            "title": "Linked Habits"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "category",
+          "metric",
+          "target_value",
+          "current_value",
+          "unit",
+          "progress",
+          "done",
+          "linked_quests",
+          "linked_habits"
+        ],
+        "title": "GoalOut"
+      },
+      "GoalUpdateIn": {
+        "properties": {
+          "title": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "target_value": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 100000.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Value"
+          },
+          "current_value": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 100000.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Value",
+            "description": "Manual goals only"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 30
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "GoalUpdateIn"
       },
       "HTTPValidationError": {
         "properties": {
@@ -2082,6 +3332,19 @@
             ],
             "title": "Times Per Week",
             "description": "Required for frequency=weekly"
+          },
+          "goal_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goal Id",
+            "description": "A goal of the open life cycle"
           }
         },
         "additionalProperties": false,
@@ -2187,6 +3450,18 @@
             "type": "boolean",
             "title": "Is Active"
           },
+          "goal_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goal Id"
+          },
           "starts_on": {
             "type": "string",
             "format": "date",
@@ -2255,6 +3530,7 @@
           "times_per_week",
           "xp_reward",
           "is_active",
+          "goal_id",
           "starts_on",
           "created_at",
           "required_today",
@@ -2360,6 +3636,18 @@
             "type": "boolean",
             "title": "Is Active"
           },
+          "goal_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goal Id"
+          },
           "starts_on": {
             "type": "string",
             "format": "date",
@@ -2421,6 +3709,7 @@
           "times_per_week",
           "xp_reward",
           "is_active",
+          "goal_id",
           "starts_on",
           "created_at",
           "required_today",
@@ -2479,6 +3768,19 @@
               }
             ],
             "title": "Description"
+          },
+          "goal_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goal Id",
+            "description": "null removes the link"
           }
         },
         "additionalProperties": false,
@@ -3138,6 +4440,19 @@
             "type": "array",
             "maxItems": 50,
             "title": "Checklist"
+          },
+          "goal_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goal Id",
+            "description": "A goal of the open life cycle"
           }
         },
         "additionalProperties": false,
@@ -3237,6 +4552,18 @@
             "type": "array",
             "title": "Checklist"
           },
+          "goal_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goal Id"
+          },
           "starts_at": {
             "type": "string",
             "format": "date-time",
@@ -3324,6 +4651,7 @@
           "weekdays",
           "priority",
           "checklist",
+          "goal_id",
           "starts_at",
           "due_at",
           "completed_at",
@@ -3444,6 +4772,18 @@
             "type": "array",
             "title": "Checklist"
           },
+          "goal_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goal Id"
+          },
           "starts_at": {
             "type": "string",
             "format": "date-time",
@@ -3524,6 +4864,7 @@
           "weekdays",
           "priority",
           "checklist",
+          "goal_id",
           "starts_at",
           "due_at",
           "completed_at",
@@ -3625,6 +4966,19 @@
               }
             ],
             "title": "Checklist"
+          },
+          "goal_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goal Id",
+            "description": "null removes the link"
           }
         },
         "additionalProperties": false,
@@ -3641,6 +4995,34 @@
           "legendary"
         ],
         "title": "Rarity"
+      },
+      "Recommendation": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "params": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Params"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code"
+        ],
+        "title": "Recommendation",
+        "description": "A rule-based hint for the next cycle; the client words it by `code`."
       },
       "RefreshIn": {
         "properties": {
@@ -3691,6 +5073,99 @@
           "display_name"
         ],
         "title": "RegisterIn"
+      },
+      "ReportAchievement": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "rarity": {
+            "$ref": "#/components/schemas/Rarity"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "title",
+          "rarity"
+        ],
+        "title": "ReportAchievement"
+      },
+      "ReportAttribute": {
+        "properties": {
+          "attribute_type": {
+            "$ref": "#/components/schemas/AttributeType"
+          },
+          "xp_gained": {
+            "type": "integer",
+            "title": "Xp Gained"
+          },
+          "level_before": {
+            "type": "integer",
+            "title": "Level Before"
+          },
+          "level_after": {
+            "type": "integer",
+            "title": "Level After"
+          }
+        },
+        "type": "object",
+        "required": [
+          "attribute_type",
+          "xp_gained",
+          "level_before",
+          "level_after"
+        ],
+        "title": "ReportAttribute"
+      },
+      "ReportGoal": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "metric": {
+            "$ref": "#/components/schemas/GoalMetric"
+          },
+          "target_value": {
+            "type": "integer",
+            "title": "Target Value"
+          },
+          "current_value": {
+            "type": "integer",
+            "title": "Current Value"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit"
+          },
+          "done": {
+            "type": "boolean",
+            "title": "Done"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "metric",
+          "target_value",
+          "current_value",
+          "unit",
+          "done"
+        ],
+        "title": "ReportGoal"
       },
       "RewardRules": {
         "properties": {

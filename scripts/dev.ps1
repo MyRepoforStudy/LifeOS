@@ -55,6 +55,13 @@ if (-not (Test-Path -LiteralPath $npm)) {
     throw 'npm.cmd not found. Install Node.js LTS: winget install --id OpenJS.NodeJS.LTS -e'
 }
 
+# Development uses its own database (lifeos_dev): experiments and migrations in
+# progress never touch your real data in lifeos, which prod.ps1 serves.
+$devUrl = Get-Content -LiteralPath (Join-Path $Root 'backend\.env') |
+    Where-Object { $_ -match '^DEV_DATABASE_URL=' } | Select-Object -First 1
+if (-not $devUrl) { throw 'DEV_DATABASE_URL is missing in backend\.env. Run scripts\devdb.ps1 init once more.' }
+$env:DATABASE_URL = $devUrl -replace '^DEV_DATABASE_URL=', ''
+
 # 1. Database (creates nothing: run scripts\devdb.ps1 init once before the first start).
 & powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'devdb.ps1') start
 if ($LASTEXITCODE -ne 0) { throw 'PostgreSQL did not start, see the message above.' }

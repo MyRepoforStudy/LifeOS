@@ -393,6 +393,168 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/cycles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Cycles
+         * @description All cycles, the newest first: the open one and the history.
+         */
+        get: operations["list_cycles_api_v1_cycles_get"];
+        put?: never;
+        /**
+         * Create Cycle
+         * @description Start a cycle of any length (7-366 days). Only one cycle can be open at a time.
+         */
+        post: operations["create_cycle_api_v1_cycles_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cycles/current": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Current Cycle
+         * @description The open (active or paused) cycle, or null.
+         */
+        get: operations["current_cycle_api_v1_cycles_current_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cycles/{cycle_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Cycle */
+        get: operations["get_cycle_api_v1_cycles__cycle_id__get"];
+        put?: never;
+        post?: never;
+        /**
+         * Cancel Cycle
+         * @description Cancel the open cycle: it stays in the history, without a report or reward.
+         */
+        delete: operations["cancel_cycle_api_v1_cycles__cycle_id__delete"];
+        options?: never;
+        head?: never;
+        /** Update Cycle */
+        patch: operations["update_cycle_api_v1_cycles__cycle_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/cycles/{cycle_id}/goals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add Goal */
+        post: operations["add_goal_api_v1_cycles__cycle_id__goals_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cycles/{cycle_id}/goals/{goal_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Goal */
+        delete: operations["delete_goal_api_v1_cycles__cycle_id__goals__goal_id__delete"];
+        options?: never;
+        head?: never;
+        /**
+         * Update Goal
+         * @description current_value can be set only for manual goals; the others are counted.
+         */
+        patch: operations["update_goal_api_v1_cycles__cycle_id__goals__goal_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/cycles/{cycle_id}/pause": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Pause Cycle
+         * @description The paused days are added to the end date when the cycle resumes.
+         */
+        post: operations["pause_cycle_api_v1_cycles__cycle_id__pause_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cycles/{cycle_id}/resume": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Resume Cycle */
+        post: operations["resume_cycle_api_v1_cycles__cycle_id__resume_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cycles/{cycle_id}/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Complete Cycle
+         * @description Sum the cycle up: the report is saved as a snapshot. After the end date it gives
+         *     200 XP x the share of goals done; finishing early gives no reward.
+         */
+        post: operations["complete_cycle_api_v1_cycles__cycle_id__complete_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/achievements": {
         parameters: {
             query?: never;
@@ -580,6 +742,178 @@ export interface components {
             /** Achievements Unlocked */
             achievements_unlocked?: components["schemas"]["AchievementOut"][];
         };
+        /** CycleCompletionOut */
+        CycleCompletionOut: {
+            cycle: components["schemas"]["CycleOut"];
+            /** Xp Awarded */
+            xp_awarded: number;
+            player: components["schemas"]["PlayerXpOut"];
+            /** Achievements Unlocked */
+            achievements_unlocked?: components["schemas"]["AchievementOut"][];
+        };
+        /** CycleCreateIn */
+        CycleCreateIn: {
+            /** Title */
+            title: string;
+            /** Description */
+            description?: string | null;
+            /**
+             * Duration Days
+             * @description Any length: 30, 45, 66, 90, 120...
+             */
+            duration_days: number;
+            /**
+             * Starts On
+             * @description Local date; today by default, at most 30 days ahead
+             */
+            starts_on?: string | null;
+            /** Goals */
+            goals?: components["schemas"]["GoalCreateIn"][];
+        };
+        /**
+         * CycleDisplayStatus
+         * @enum {string}
+         */
+        CycleDisplayStatus: "planned" | "active" | "paused" | "finished" | "completed" | "cancelled";
+        /** CycleOut */
+        CycleOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Title */
+            title: string;
+            /** Description */
+            description: string | null;
+            /** Duration Days */
+            duration_days: number;
+            /**
+             * Starts On
+             * Format: date
+             */
+            starts_on: string;
+            /**
+             * Ends On
+             * Format: date
+             */
+            ends_on: string;
+            status: components["schemas"]["CycleDisplayStatus"];
+            /**
+             * Day Number
+             * @description Active days lived so far, 0 before the start
+             */
+            day_number: number;
+            /** Days Left */
+            days_left: number;
+            /** Time Progress */
+            time_progress: number;
+            /** Paused On */
+            paused_on: string | null;
+            /** Paused Days */
+            paused_days: number;
+            /** Goals */
+            goals: components["schemas"]["GoalOut"][];
+            /** Goals Done */
+            goals_done: number;
+            /** Goals Total */
+            goals_total: number;
+            /** Xp In Cycle */
+            xp_in_cycle: number;
+            /**
+             * Reached End
+             * @description Summing up now gives the cycle reward
+             */
+            reached_end: boolean;
+            /** Finished Early */
+            finished_early: boolean | null;
+            /** Completed At */
+            completed_at: string | null;
+            /** Xp Awarded */
+            xp_awarded: number;
+            report: components["schemas"]["CycleReport"] | null;
+        };
+        /** CycleReport */
+        CycleReport: {
+            /**
+             * Starts On
+             * Format: date
+             */
+            starts_on: string;
+            /**
+             * Ends On
+             * Format: date
+             */
+            ends_on: string;
+            /** Duration Days */
+            duration_days: number;
+            /** Paused Days */
+            paused_days: number;
+            /** Finished Early */
+            finished_early: boolean;
+            /** Goals */
+            goals: components["schemas"]["ReportGoal"][];
+            /** Goals Done */
+            goals_done: number;
+            /** Goals Total */
+            goals_total: number;
+            /** Xp Total */
+            xp_total: number;
+            /** Attributes */
+            attributes: components["schemas"]["ReportAttribute"][];
+            /** Learning Minutes */
+            learning_minutes: number;
+            /** Workouts */
+            workouts: number;
+            /** Quests Completed */
+            quests_completed: number;
+            /** Habit Checkins */
+            habit_checkins: number;
+            /** Active Days */
+            active_days: number;
+            /** Achievements */
+            achievements: components["schemas"]["ReportAchievement"][];
+            /** Cycle Xp */
+            cycle_xp: number;
+            /** Recommendations */
+            recommendations: components["schemas"]["Recommendation"][];
+        };
+        /** CycleSummaryOut */
+        CycleSummaryOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Title */
+            title: string;
+            status: components["schemas"]["CycleDisplayStatus"];
+            /**
+             * Starts On
+             * Format: date
+             */
+            starts_on: string;
+            /**
+             * Ends On
+             * Format: date
+             */
+            ends_on: string;
+            /** Duration Days */
+            duration_days: number;
+            /** Goals Done */
+            goals_done: number;
+            /** Goals Total */
+            goals_total: number;
+            /** Xp Awarded */
+            xp_awarded: number;
+        };
+        /** CycleUpdateIn */
+        CycleUpdateIn: {
+            /** Title */
+            title?: string | null;
+            /** Description */
+            description?: string | null;
+        };
         /** DailyXp */
         DailyXp: {
             /**
@@ -601,6 +935,66 @@ export interface components {
          * @enum {string}
          */
         EffectiveQuestStatus: "pending" | "active" | "completed" | "skipped" | "expired" | "cancelled";
+        /** GoalCreateIn */
+        GoalCreateIn: {
+            /** Title */
+            title: string;
+            category: components["schemas"]["QuestCategory"];
+            /** @default manual */
+            metric: components["schemas"]["GoalMetric"];
+            /**
+             * Target Value
+             * @default 1
+             */
+            target_value: number;
+            /** Unit */
+            unit?: string | null;
+        };
+        /**
+         * GoalMetric
+         * @enum {string}
+         */
+        GoalMetric: "manual" | "completions" | "minutes";
+        /** GoalOut */
+        GoalOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Title */
+            title: string;
+            category: components["schemas"]["QuestCategory"];
+            metric: components["schemas"]["GoalMetric"];
+            /** Target Value */
+            target_value: number;
+            /** Current Value */
+            current_value: number;
+            /** Unit */
+            unit: string | null;
+            /** Progress */
+            progress: number;
+            /** Done */
+            done: boolean;
+            /** Linked Quests */
+            linked_quests: number;
+            /** Linked Habits */
+            linked_habits: number;
+        };
+        /** GoalUpdateIn */
+        GoalUpdateIn: {
+            /** Title */
+            title?: string | null;
+            /** Target Value */
+            target_value?: number | null;
+            /**
+             * Current Value
+             * @description Manual goals only
+             */
+            current_value?: number | null;
+            /** Unit */
+            unit?: string | null;
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -640,6 +1034,11 @@ export interface components {
              * @description Required for frequency=weekly
              */
             times_per_week?: number | null;
+            /**
+             * Goal Id
+             * @description A goal of the open life cycle
+             */
+            goal_id?: string | null;
         };
         /** HabitDayOut */
         HabitDayOut: {
@@ -677,6 +1076,8 @@ export interface components {
             xp_reward: number;
             /** Is Active */
             is_active: boolean;
+            /** Goal Id */
+            goal_id: string | null;
             /**
              * Starts On
              * Format: date
@@ -750,6 +1151,8 @@ export interface components {
             xp_reward: number;
             /** Is Active */
             is_active: boolean;
+            /** Goal Id */
+            goal_id: string | null;
             /**
              * Starts On
              * Format: date
@@ -800,6 +1203,11 @@ export interface components {
             title?: string | null;
             /** Description */
             description?: string | null;
+            /**
+             * Goal Id
+             * @description null removes the link
+             */
+            goal_id?: string | null;
         };
         /** LedgerEntryOut */
         LedgerEntryOut: {
@@ -1002,6 +1410,11 @@ export interface components {
             due_at?: string | null;
             /** Checklist */
             checklist?: components["schemas"]["ChecklistItem"][];
+            /**
+             * Goal Id
+             * @description A goal of the open life cycle
+             */
+            goal_id?: string | null;
         };
         /** QuestDetailOut */
         QuestDetailOut: {
@@ -1033,6 +1446,8 @@ export interface components {
             priority: number;
             /** Checklist */
             checklist: components["schemas"]["ChecklistItem"][];
+            /** Goal Id */
+            goal_id: string | null;
             /**
              * Starts At
              * Format: date-time
@@ -1098,6 +1513,8 @@ export interface components {
             priority: number;
             /** Checklist */
             checklist: components["schemas"]["ChecklistItem"][];
+            /** Goal Id */
+            goal_id: string | null;
             /**
              * Starts At
              * Format: date-time
@@ -1146,12 +1563,29 @@ export interface components {
             weekdays?: number[] | null;
             /** Checklist */
             checklist?: components["schemas"]["ChecklistItem"][] | null;
+            /**
+             * Goal Id
+             * @description null removes the link
+             */
+            goal_id?: string | null;
         };
         /**
          * Rarity
          * @enum {string}
          */
         Rarity: "common" | "rare" | "epic" | "legendary";
+        /**
+         * Recommendation
+         * @description A rule-based hint for the next cycle; the client words it by `code`.
+         */
+        Recommendation: {
+            /** Code */
+            code: string;
+            /** Params */
+            params?: {
+                [key: string]: string | number;
+            };
+        };
         /** RefreshIn */
         RefreshIn: {
             /** Refresh Token */
@@ -1173,6 +1607,38 @@ export interface components {
              * @default UTC
              */
             timezone: string;
+        };
+        /** ReportAchievement */
+        ReportAchievement: {
+            /** Code */
+            code: string;
+            /** Title */
+            title: string;
+            rarity: components["schemas"]["Rarity"];
+        };
+        /** ReportAttribute */
+        ReportAttribute: {
+            attribute_type: components["schemas"]["AttributeType"];
+            /** Xp Gained */
+            xp_gained: number;
+            /** Level Before */
+            level_before: number;
+            /** Level After */
+            level_after: number;
+        };
+        /** ReportGoal */
+        ReportGoal: {
+            /** Title */
+            title: string;
+            metric: components["schemas"]["GoalMetric"];
+            /** Target Value */
+            target_value: number;
+            /** Current Value */
+            current_value: number;
+            /** Unit */
+            unit: string | null;
+            /** Done */
+            done: boolean;
         };
         /** RewardRules */
         RewardRules: {
@@ -2212,6 +2678,374 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HabitOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_cycles_api_v1_cycles_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CycleSummaryOut"][];
+                };
+            };
+        };
+    };
+    create_cycle_api_v1_cycles_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Idempotency-Key"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CycleCreateIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CycleOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    current_cycle_api_v1_cycles_current_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CycleOut"] | null;
+                };
+            };
+        };
+    };
+    get_cycle_api_v1_cycles__cycle_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cycle_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CycleOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cancel_cycle_api_v1_cycles__cycle_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cycle_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_cycle_api_v1_cycles__cycle_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cycle_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CycleUpdateIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CycleOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    add_goal_api_v1_cycles__cycle_id__goals_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cycle_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GoalCreateIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CycleOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_goal_api_v1_cycles__cycle_id__goals__goal_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cycle_id: string;
+                goal_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CycleOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_goal_api_v1_cycles__cycle_id__goals__goal_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cycle_id: string;
+                goal_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GoalUpdateIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CycleOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    pause_cycle_api_v1_cycles__cycle_id__pause_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cycle_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CycleOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    resume_cycle_api_v1_cycles__cycle_id__resume_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cycle_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CycleOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    complete_cycle_api_v1_cycles__cycle_id__complete_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Idempotency-Key"?: string | null;
+            };
+            path: {
+                cycle_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CycleCompletionOut"];
                 };
             };
             /** @description Validation Error */

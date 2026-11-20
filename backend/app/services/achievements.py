@@ -7,6 +7,7 @@ Condition types (achievements.condition_config):
 - {"type": "learning_minutes", "minutes": N} learning minutes credited by quests
 - {"type": "level", "level": N}
 - {"type": "habit_streak", "days": N}        best streak of a day-based habit
+- {"type": "cycles_completed", "count": N}   life cycles summed up after their end date
 
 Unlocking runs inside the completion's transaction with the profile already locked.
 Achievement XP can raise the level, which can unlock a level achievement: the loop
@@ -20,10 +21,27 @@ from typing import Any
 from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.domain.enums import HabitFrequency, HabitLogStatus, LedgerReason, LedgerSource, OccurrenceStatus
-from app.domain.streaks import Schedule, compute_streak
 from app.domain import dates
-from app.models import Achievement, Habit, HabitLog, PlayerProfile, Quest, QuestOccurrence, User, UserAchievement
+from app.domain.enums import (
+    CycleStatus,
+    HabitFrequency,
+    HabitLogStatus,
+    LedgerReason,
+    LedgerSource,
+    OccurrenceStatus,
+)
+from app.domain.streaks import Schedule, compute_streak
+from app.models import (
+    Achievement,
+    Habit,
+    HabitLog,
+    LifeCycle,
+    PlayerProfile,
+    Quest,
+    QuestOccurrence,
+    User,
+    UserAchievement,
+)
 from app.schemas import AchievementOut, AchievementProgress
 from app.services.game_config import GameSettings
 from app.services.player import effective_timezone
@@ -67,6 +85,8 @@ class _Evaluator:
             return Progress(await self._cached("best_streak", self._best_day_streak), int(config["days"]))
         if kind == "completions":
             return Progress(await self._completions(config), int(config["count"]))
+        if kind == "cycles_completed":
+            return Progress(await self._cached("cycles_completed", self._cycles_completed), int(config["count"]))
         raise ValueError(f"Unknown achievement condition {kind!r} ({achievement.code})")
 
     async def _cached(self, key: str, compute) -> int:  # type: ignore[no-untyped-def]
@@ -100,6 +120,17 @@ class _Evaluator:
 
     async def _best_day_streak(self) -> int:
         return await best_day_streak(self.session, self.user, self.now)
+
+    async def _cycles_completed(self) -> int:
+        """Cycles summed up after their end date (finishing early does not count)."""
+        value = await self.session.scalar(
+            select(func.count()).where(
+                LifeCycle.user_id == self.user.id,
+                LifeCycle.status == CycleStatus.COMPLETED,
+                LifeCycle.finished_early.is_(False),
+            )
+        )
+        return int(value or 0)
 
     async def _completions(self, config: dict[str, Any]) -> int:
         source = config.get("source", "any")

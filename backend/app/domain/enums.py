@@ -71,6 +71,7 @@ class LedgerSource(StrEnum):
     HABIT = "habit"
     HABIT_UNDO = "habit_undo"
     ACHIEVEMENT = "achievement"
+    CYCLE = "cycle"
     ADJUSTMENT = "adjustment"
 
 
@@ -80,6 +81,7 @@ class LedgerReason(StrEnum):
     HABIT_COMPLETED = "habit_completed"
     HABIT_COMPLETION_UNDONE = "habit_completion_undone"
     ACHIEVEMENT_UNLOCKED = "achievement_unlocked"
+    CYCLE_COMPLETED = "cycle_completed"
     MANUAL_ADJUSTMENT = "manual_adjustment"
 
 
@@ -115,6 +117,33 @@ class Rarity(StrEnum):
     RARE = "rare"
     EPIC = "epic"
     LEGENDARY = "legendary"
+
+
+class CycleStatus(StrEnum):
+    """Stored status; "planned" is shown while today is before starts_on."""
+
+    ACTIVE = "active"
+    PAUSED = "paused"
+    COMPLETED = "completed"
+    CANCELLED = "cancelled"
+
+
+class CycleDisplayStatus(StrEnum):
+    PLANNED = "planned"
+    ACTIVE = "active"
+    PAUSED = "paused"
+    FINISHED = "finished"  # the end date has passed; the player still has to sum it up
+    COMPLETED = "completed"
+    CANCELLED = "cancelled"
+
+
+class GoalMetric(StrEnum):
+    MANUAL = "manual"  # the player updates the value
+    COMPLETIONS = "completions"  # completions of linked quests and habits during the cycle
+    MINUTES = "minutes"  # learning minutes of linked quests during the cycle
+
+
+OPEN_CYCLE_STATUSES = frozenset({CycleStatus.ACTIVE, CycleStatus.PAUSED})
 
 
 ONE_OFF_TYPES = frozenset({QuestType.PERSONAL, QuestType.CHALLENGE, QuestType.MILESTONE})

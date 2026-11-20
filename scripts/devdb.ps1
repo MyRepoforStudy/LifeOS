@@ -61,6 +61,12 @@ function Read-EnvFile {
 function Initialize-EnvFile {
     $map = Read-EnvFile
     if ($map.ContainsKey('POSTGRES_SUPERUSER_PASSWORD') -and $map.ContainsKey('LIFEOS_DB_PASSWORD')) {
+        if (-not $map.ContainsKey('DEV_DATABASE_URL')) {
+            # Older .env files predate the separate development database.
+            Add-Content -LiteralPath $EnvFile -Encoding ASCII `
+                -Value "DEV_DATABASE_URL=postgresql+asyncpg://lifeos:$($map['LIFEOS_DB_PASSWORD'])@localhost:$Port/lifeos_dev"
+            $map = Read-EnvFile
+        }
         return $map
     }
     if (Test-Path -LiteralPath $EnvFile) {
@@ -74,6 +80,7 @@ function Initialize-EnvFile {
         "POSTGRES_SUPERUSER_PASSWORD=$superuser",
         "LIFEOS_DB_PASSWORD=$app",
         "DATABASE_URL=postgresql+asyncpg://lifeos:$app@localhost:$Port/lifeos",
+        "DEV_DATABASE_URL=postgresql+asyncpg://lifeos:$app@localhost:$Port/lifeos_dev",
         "TEST_DATABASE_URL=postgresql+asyncpg://lifeos:$app@localhost:$Port/lifeos_test",
         "JWT_SECRET=$jwt"
     )
@@ -128,6 +135,8 @@ WHERE NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'lifeos') \gexec
 ALTER ROLE lifeos WITH LOGIN PASSWORD :'app_password';
 SELECT 'CREATE DATABASE lifeos OWNER lifeos'
 WHERE NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'lifeos') \gexec
+SELECT 'CREATE DATABASE lifeos_dev OWNER lifeos'
+WHERE NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'lifeos_dev') \gexec
 SELECT 'CREATE DATABASE lifeos_test OWNER lifeos'
 WHERE NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'lifeos_test') \gexec
 '@
@@ -151,7 +160,7 @@ switch ($Command) {
         Initialize-Cluster $map
         Start-Server
         Initialize-Databases $map
-        Write-Host "Ready: databases 'lifeos' and 'lifeos_test' on localhost:$Port (role 'lifeos')."
+        Write-Host "Ready: databases 'lifeos' (your data), 'lifeos_dev' and 'lifeos_test' on localhost:$Port (role 'lifeos')."
     }
     'start' { Start-Server }
     'stop' {

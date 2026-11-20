@@ -25,7 +25,9 @@ from app.domain.enums import (
     AchievementCategory,
     Activity,
     AttributeType,
+    CycleStatus,
     Difficulty,
+    GoalMetric,
     HabitFrequency,
     HabitLogStatus,
     OccurrenceStatus,
@@ -192,6 +194,8 @@ class Quest(Base):
     priority: Mapped[int] = mapped_column(SmallInteger, server_default="2")
     # Sub-tasks: a plain checklist, they never give XP.
     checklist: Mapped[list[dict[str, Any]]] = mapped_column(JSONB, server_default=text("'[]'::jsonb"))
+    # Goal of a life cycle this quest counts towards.
+    goal_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("cycle_goals.id", ondelete="SET NULL"), index=True)
     starts_at: Mapped[datetime]
     # Local date of starts_at, fixed at creation. One-off quests have exactly one
     # occurrence on this date, so the idempotency key never depends on when the
@@ -284,6 +288,7 @@ class Habit(Base):
     weekdays: Mapped[list[int] | None] = mapped_column(ARRAY(SmallInteger))
     times_per_week: Mapped[int | None] = mapped_column(SmallInteger)
     xp_reward: Mapped[int] = mapped_column(Integer)
+    goal_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("cycle_goals.id", ondelete="SET NULL"), index=True)
     # Local date the habit starts counting from (the creation day).
     starts_on: Mapped[date]
     is_active: Mapped[bool] = mapped_column(server_default=text("true"))
@@ -347,3 +352,70 @@ class UserAchievement(Base):
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
     achievement_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("achievements.id", ondelete="CASCADE"))
     unlocked_at: Mapped[datetime]
+
+
+class LifeCycle(Base):
+    """A development cycle of any length (30, 66, 90 days...). At most one is open at a time.
+
+    Pausing moves ends_on forward by the paused days. A completed cycle keeps its
+    report as a snapshot and is never changed afterwards.
+    """
+
+    __tablename__ = "life_cycles"
+    __table_args__ = (
+        CheckConstraint(_in("status", CycleStatus), name="status_valid"),
+        CheckConstraint("duration_days BETWEEN 7 AND 366", name="duration_range"),
+        CheckConstraint("ends_on >= starts_on", name="ends_after_start"),
+        CheckConstraint("paused_days >= 0", name="paused_days_non_negative"),
+        CheckConstraint("xp_awarded >= 0", name="xp_awarded_non_negative"),
+        Index(
+            "uq_life_cycles_one_open_per_user",
+            "user_id",
+            unique=True,
+            postgresql_where=text("status IN ('active', 'paused')"),
+        ),
+        Index("ix_life_cycles_user_id_starts_on", "user_id", "starts_on"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=new_id)
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    title: Mapped[str] = mapped_column(String(200))
+    description: Mapped[str | None] = mapped_column(Text)
+    duration_days: Mapped[int] = mapped_column(Integer)
+    starts_on: Mapped[date]
+    ends_on: Mapped[date]
+    status: Mapped[str] = mapped_column(String(20), server_default=CycleStatus.ACTIVE.value)
+    paused_on: Mapped[date | None]
+    paused_days: Mapped[int] = mapped_column(Integer, server_default="0")
+    finished_early: Mapped[bool | None]
+    completed_at: Mapped[datetime | None]
+    xp_awarded: Mapped[int] = mapped_column(Integer, server_default="0")
+    report: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
+
+
+class CycleGoal(Base):
+    """A goal of a cycle. Progress is manual or counted from linked quests and habits."""
+
+    __tablename__ = "cycle_goals"
+    __table_args__ = (
+        CheckConstraint(_in("metric", GoalMetric), name="metric_valid"),
+        CheckConstraint(_in("category", QuestCategory), name="category_valid"),
+        CheckConstraint("target_value > 0", name="target_positive"),
+        CheckConstraint("current_value >= 0", name="current_non_negative"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=new_id)
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    cycle_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("life_cycles.id", ondelete="CASCADE"), index=True)
+    title: Mapped[str] = mapped_column(String(200))
+    category: Mapped[str] = mapped_column(String(20))
+    metric: Mapped[str] = mapped_column(String(20))
+    target_value: Mapped[int] = mapped_column(Integer)
+    # Used by manual goals; the other metrics are counted on the fly.
+    current_value: Mapped[int] = mapped_column(Integer, server_default="0")
+    unit: Mapped[str | None] = mapped_column(String(30))
+    sort_order: Mapped[int] = mapped_column(Integer, server_default="0")
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())

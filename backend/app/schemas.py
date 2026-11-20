@@ -19,8 +19,10 @@ from app.domain.enums import (
     AchievementCategory,
     Activity,
     AttributeType,
+    CycleDisplayStatus,
     Difficulty,
     EffectiveQuestStatus,
+    GoalMetric,
     HabitFrequency,
     OccurrenceStatus,
     QuestCategory,
@@ -226,6 +228,7 @@ class QuestCreateIn(InputModel):
     starts_at: AwareDatetime | None = None
     due_at: AwareDatetime | None = None
     checklist: list[ChecklistItem] = Field(default_factory=list, max_length=50)
+    goal_id: uuid.UUID | None = Field(default=None, description="A goal of the open life cycle")
 
     @field_validator("attribute_types")
     @classmethod
@@ -258,6 +261,7 @@ class QuestUpdateIn(InputModel):
     due_at: AwareDatetime | None = None
     weekdays: Weekdays | None = None
     checklist: list[ChecklistItem] | None = Field(default=None, max_length=50)
+    goal_id: uuid.UUID | None = Field(default=None, description="null removes the link")
 
 
 class OccurrenceOut(BaseModel):
@@ -287,6 +291,7 @@ class QuestOut(BaseModel):
     weekdays: list[int] | None
     priority: int
     checklist: list[ChecklistItem]
+    goal_id: uuid.UUID | None
     starts_at: datetime
     due_at: datetime | None
     completed_at: datetime | None
@@ -346,6 +351,7 @@ class HabitCreateIn(InputModel):
     frequency: HabitFrequency = HabitFrequency.DAILY
     weekdays: Weekdays | None = Field(default=None, description="Required for frequency=weekdays")
     times_per_week: int | None = Field(default=None, ge=1, le=7, description="Required for frequency=weekly")
+    goal_id: uuid.UUID | None = Field(default=None, description="A goal of the open life cycle")
 
     @model_validator(mode="after")
     def _schedule(self) -> "HabitCreateIn":
@@ -363,6 +369,7 @@ class HabitUpdateIn(InputModel):
 
     title: Title | None = None
     description: Annotated[str, StringConstraints(max_length=5000)] | None = None
+    goal_id: uuid.UUID | None = Field(default=None, description="null removes the link")
 
 
 class HabitFreezeIn(InputModel):
@@ -387,6 +394,7 @@ class HabitOut(BaseModel):
     times_per_week: int | None
     xp_reward: int
     is_active: bool
+    goal_id: uuid.UUID | None
     starts_on: date
     created_at: datetime
     required_today: bool = Field(description="Planned for today (weekly habits: always)")
@@ -418,3 +426,141 @@ class HabitUndoOut(BaseModel):
     habit: HabitOut
     xp_reverted: int
     player: PlayerXpOut
+
+
+# --- life cycles ----------------------------------------------------------------------
+
+
+class GoalCreateIn(InputModel):
+    title: Title
+    category: QuestCategory
+    metric: GoalMetric = GoalMetric.MANUAL
+    target_value: int = Field(default=1, ge=1, le=100_000)
+    unit: Annotated[str, StringConstraints(strip_whitespace=True, max_length=30)] | None = None
+
+
+class GoalUpdateIn(InputModel):
+    title: Title | None = None
+    target_value: int | None = Field(default=None, ge=1, le=100_000)
+    current_value: int | None = Field(default=None, ge=0, le=100_000, description="Manual goals only")
+    unit: Annotated[str, StringConstraints(strip_whitespace=True, max_length=30)] | None = None
+
+
+class CycleCreateIn(InputModel):
+    title: Title
+    description: Annotated[str, StringConstraints(max_length=5000)] | None = None
+    duration_days: int = Field(ge=7, le=366, description="Any length: 30, 45, 66, 90, 120...")
+    starts_on: date | None = Field(default=None, description="Local date; today by default, at most 30 days ahead")
+    goals: list[GoalCreateIn] = Field(default_factory=list, max_length=10)
+
+
+class CycleUpdateIn(InputModel):
+    title: Title | None = None
+    description: Annotated[str, StringConstraints(max_length=5000)] | None = None
+
+
+class GoalOut(BaseModel):
+    id: uuid.UUID
+    title: str
+    category: QuestCategory
+    metric: GoalMetric
+    target_value: int
+    current_value: int
+    unit: str | None
+    progress: float
+    done: bool
+    linked_quests: int
+    linked_habits: int
+
+
+class ReportGoal(BaseModel):
+    title: str
+    metric: GoalMetric
+    target_value: int
+    current_value: int
+    unit: str | None
+    done: bool
+
+
+class ReportAttribute(BaseModel):
+    attribute_type: AttributeType
+    xp_gained: int
+    level_before: int
+    level_after: int
+
+
+class ReportAchievement(BaseModel):
+    code: str
+    title: str
+    rarity: Rarity
+
+
+class Recommendation(BaseModel):
+    """A rule-based hint for the next cycle; the client words it by `code`."""
+
+    code: str
+    params: dict[str, str | int] = Field(default_factory=dict)
+
+
+class CycleReport(BaseModel):
+    starts_on: date
+    ends_on: date
+    duration_days: int
+    paused_days: int
+    finished_early: bool
+    goals: list[ReportGoal]
+    goals_done: int
+    goals_total: int
+    xp_total: int
+    attributes: list[ReportAttribute]
+    learning_minutes: int
+    workouts: int
+    quests_completed: int
+    habit_checkins: int
+    active_days: int
+    achievements: list[ReportAchievement]
+    cycle_xp: int
+    recommendations: list[Recommendation]
+
+
+class CycleOut(BaseModel):
+    id: uuid.UUID
+    title: str
+    description: str | None
+    duration_days: int
+    starts_on: date
+    ends_on: date
+    status: CycleDisplayStatus
+    day_number: int = Field(description="Active days lived so far, 0 before the start")
+    days_left: int
+    time_progress: float
+    paused_on: date | None
+    paused_days: int
+    goals: list[GoalOut]
+    goals_done: int
+    goals_total: int
+    xp_in_cycle: int
+    reached_end: bool = Field(description="Summing up now gives the cycle reward")
+    finished_early: bool | None
+    completed_at: datetime | None
+    xp_awarded: int
+    report: CycleReport | None
+
+
+class CycleSummaryOut(BaseModel):
+    id: uuid.UUID
+    title: str
+    status: CycleDisplayStatus
+    starts_on: date
+    ends_on: date
+    duration_days: int
+    goals_done: int
+    goals_total: int
+    xp_awarded: int
+
+
+class CycleCompletionOut(BaseModel):
+    cycle: CycleOut
+    xp_awarded: int
+    player: PlayerXpOut
+    achievements_unlocked: list[AchievementOut] = Field(default_factory=list)

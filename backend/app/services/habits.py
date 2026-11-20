@@ -36,6 +36,7 @@ from app.schemas import (
     StreakOut,
 )
 from app.services.achievements import unlock_new
+from app.services.cycles import resolve_goal
 from app.services.game_config import GameSettings
 from app.services.player import effective_timezone
 from app.services.xp import LedgerDraft, XpChange, apply_xp, lock_profile, player_xp_out
@@ -103,6 +104,7 @@ def habit_out(habit: Habit, logs: _Logs, today: date, rules: RewardRules) -> Hab
         times_per_week=habit.times_per_week,
         xp_reward=habit.xp_reward,
         is_active=habit.is_active,
+        goal_id=habit.goal_id,
         starts_on=habit.starts_on,
         created_at=habit.created_at,
         required_today=weekly or schedule.is_required(today),
@@ -184,6 +186,7 @@ async def create_habit(
     else:
         default = CATEGORY_DEFAULT_ATTRIBUTE[data.category]
         attributes = [default] if default else []
+    goal_id = (await resolve_goal(session, user.id, data.goal_id)).id if data.goal_id else None
     habit = Habit(
         id=new_id(),
         user_id=user.id,
@@ -195,6 +198,7 @@ async def create_habit(
         weekdays=data.weekdays,
         times_per_week=data.times_per_week,
         xp_reward=game.rewards.habit,
+        goal_id=goal_id,
         starts_on=_today(user, now),
         is_active=True,
     )
@@ -235,6 +239,8 @@ async def update_habit(
         habit.title = data.title
     if "description" in fields:
         habit.description = data.description
+    if "goal_id" in fields:
+        habit.goal_id = (await resolve_goal(session, user.id, data.goal_id)).id if data.goal_id else None
     await session.flush()
     await session.refresh(habit)
     return await _view(session, habit, user, now, game.rewards)
