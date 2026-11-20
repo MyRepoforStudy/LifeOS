@@ -28,6 +28,8 @@ from app.domain.enums import (
     QuestCategory,
     QuestType,
     Rarity,
+    RecommendationStatus,
+    RecommendationType,
     XpLimitReason,
 )
 
@@ -564,3 +566,133 @@ class CycleCompletionOut(BaseModel):
     xp_awarded: int
     player: PlayerXpOut
     achievements_unlocked: list[AchievementOut] = Field(default_factory=list)
+
+
+# --- adaptive engine (phase 5) ------------------------------------------------------
+
+
+class CategoryStatOut(BaseModel):
+    category: QuestCategory
+    planned: int
+    done: int
+    rate: float | None
+
+
+class WindowOut(BaseModel):
+    """Plan against reality over the last complete days (today is still open)."""
+
+    days: int
+    first_day: date
+    last_day: date
+    planned: int
+    done: int
+    skipped: int
+    rate: float | None = Field(description="Share of the plan done, null without a plan")
+    quests_planned: int
+    quests_done: int
+    habits_planned: int
+    habits_done: int
+    learning_minutes_planned: int
+    learning_minutes_done: int
+    active_days: int
+    xp: int
+    categories: list[CategoryStatOut]
+
+
+class ItemStatOut(BaseModel):
+    kind: Literal["quest", "habit"]
+    id: uuid.UUID
+    title: str
+    category: QuestCategory
+    planned: int
+    done: int
+    skipped: int
+    rate: float | None
+
+
+class AnalysisOut(BaseModel):
+    today: date
+    week: WindowOut
+    month: WindowOut
+    previous_week_rate: float | None = Field(
+        description="The 7 days before the last 7; null when that week had too little plan to compare with"
+    )
+    struggling: list[ItemStatOut] = Field(description="Items most often missed in the last 14 days")
+
+
+class QuestMinutesChange(BaseModel):
+    """Daily minutes of a learning quest; the reward follows the new plan."""
+
+    op: Literal["quest_minutes"] = "quest_minutes"
+    quest_id: uuid.UUID
+    title: str
+    from_minutes: int
+    to_minutes: int
+    from_xp: int
+    to_xp: int
+
+
+class QuestWeekdaysChange(BaseModel):
+    op: Literal["quest_weekdays"] = "quest_weekdays"
+    quest_id: uuid.UUID
+    title: str
+    from_weekdays: list[int] | None = Field(description="null: every day")
+    to_weekdays: list[int]
+
+
+class QuestDueChange(BaseModel):
+    op: Literal["quest_due"] = "quest_due"
+    quest_id: uuid.UUID
+    title: str
+    from_due: datetime | None
+    to_due: datetime
+
+
+class HabitScheduleChange(BaseModel):
+    """The schedule of a habit is fixed: the old habit goes to the archive with its
+    history, and a new one with the lighter schedule takes its place."""
+
+    op: Literal["habit_schedule"] = "habit_schedule"
+    habit_id: uuid.UUID
+    title: str
+    from_frequency: HabitFrequency
+    from_weekdays: list[int] | None
+    from_times_per_week: int | None
+    to_times_per_week: int
+
+
+class CyclePauseChange(BaseModel):
+    op: Literal["cycle_pause"] = "cycle_pause"
+    cycle_id: uuid.UUID
+    title: str
+
+
+PlanChange = Annotated[
+    QuestMinutesChange | QuestWeekdaysChange | QuestDueChange | HabitScheduleChange | CyclePauseChange,
+    Field(discriminator="op"),
+]
+
+
+class AdaptiveRecommendationOut(BaseModel):
+    id: uuid.UUID
+    recommendation_type: RecommendationType
+    status: RecommendationStatus
+    title: str = Field(description="English fallback; clients localize by type and params")
+    description: str
+    params: dict[str, str | int | float | None]
+    changes: list[PlanChange]
+    created_at: datetime
+    updated_at: datetime
+    applied_at: datetime | None
+    dismissed_at: datetime | None
+
+
+class RecommendationApplyIn(InputModel):
+    changes: list[Annotated[int, Field(ge=0)]] | None = Field(
+        default=None, max_length=10, description="Indexes of the changes to apply; all of them by default"
+    )
+
+
+class RecommendationApplyOut(BaseModel):
+    recommendation: AdaptiveRecommendationOut
+    applied: int

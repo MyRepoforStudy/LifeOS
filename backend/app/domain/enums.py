@@ -146,6 +146,20 @@ class GoalMetric(StrEnum):
 OPEN_CYCLE_STATUSES = frozenset({CycleStatus.ACTIVE, CycleStatus.PAUSED})
 
 
+class RecommendationType(StrEnum):
+    OVERLOAD = "overload"  # under 40% of the plan done in a week: lighten the plan
+    STALLED_ITEM = "stalled_item"  # one quest or habit that keeps being missed
+    TOO_EASY = "too_easy"  # 90%+ done for two weeks: raise the bar
+    REST = "rest"  # a quiet stretch during a cycle: offer to pause it
+
+
+class RecommendationStatus(StrEnum):
+    PENDING = "pending"
+    APPLIED = "applied"
+    DISMISSED = "dismissed"
+    EXPIRED = "expired"  # the situation changed before the player decided
+
+
 ONE_OFF_TYPES = frozenset({QuestType.PERSONAL, QuestType.CHALLENGE, QuestType.MILESTONE})
 LATE_COMPLETION_TYPES = frozenset({QuestType.PERSONAL, QuestType.MILESTONE})
 

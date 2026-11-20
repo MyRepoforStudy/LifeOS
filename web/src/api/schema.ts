@@ -555,6 +555,89 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/adaptive/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Summary
+         * @description Plan against reality for the last 7 and 30 complete days (today is still open).
+         */
+        get: operations["summary_api_v1_adaptive_summary_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/adaptive/recommendations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Recommendations
+         * @description Pending recommendations first, then recent decisions.
+         *
+         *     Asking refreshes them: new ones appear when the last days call for it, outdated
+         *     ones expire. The plan itself changes only when a recommendation is applied.
+         */
+        get: operations["list_recommendations_api_v1_adaptive_recommendations_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/adaptive/recommendations/{recommendation_id}/apply": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Apply Recommendation
+         * @description Apply the chosen changes (all by default) together, or none if the plan has changed.
+         */
+        post: operations["apply_recommendation_api_v1_adaptive_recommendations__recommendation_id__apply_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/adaptive/recommendations/{recommendation_id}/dismiss": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Dismiss Recommendation
+         * @description Nothing changes; the same advice does not come back for a while.
+         */
+        post: operations["dismiss_recommendation_api_v1_adaptive_recommendations__recommendation_id__dismiss_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/achievements": {
         parameters: {
             query?: never;
@@ -696,6 +779,63 @@ export interface components {
          * @enum {string}
          */
         Activity: "task" | "learning" | "workout";
+        /** AdaptiveRecommendationOut */
+        AdaptiveRecommendationOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            recommendation_type: components["schemas"]["RecommendationType"];
+            status: components["schemas"]["RecommendationStatus"];
+            /**
+             * Title
+             * @description English fallback; clients localize by type and params
+             */
+            title: string;
+            /** Description */
+            description: string;
+            /** Params */
+            params: {
+                [key: string]: string | number | null;
+            };
+            /** Changes */
+            changes: (components["schemas"]["QuestMinutesChange"] | components["schemas"]["QuestWeekdaysChange"] | components["schemas"]["QuestDueChange"] | components["schemas"]["HabitScheduleChange"] | components["schemas"]["CyclePauseChange"])[];
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Applied At */
+            applied_at: string | null;
+            /** Dismissed At */
+            dismissed_at: string | null;
+        };
+        /** AnalysisOut */
+        AnalysisOut: {
+            /**
+             * Today
+             * Format: date
+             */
+            today: string;
+            week: components["schemas"]["WindowOut"];
+            month: components["schemas"]["WindowOut"];
+            /**
+             * Previous Week Rate
+             * @description The 7 days before the last 7; null when that week had too little plan to compare with
+             */
+            previous_week_rate: number | null;
+            /**
+             * Struggling
+             * @description Items most often missed in the last 14 days
+             */
+            struggling: components["schemas"]["ItemStatOut"][];
+        };
         /** AttributeOut */
         AttributeOut: {
             /** Level */
@@ -721,6 +861,16 @@ export interface components {
          * @enum {string}
          */
         AttributeType: "health" | "intelligence" | "career" | "finance";
+        /** CategoryStatOut */
+        CategoryStatOut: {
+            category: components["schemas"]["QuestCategory"];
+            /** Planned */
+            planned: number;
+            /** Done */
+            done: number;
+            /** Rate */
+            rate: number | null;
+        };
         /** ChecklistItem */
         ChecklistItem: {
             /** Title */
@@ -832,6 +982,21 @@ export interface components {
             /** Xp Awarded */
             xp_awarded: number;
             report: components["schemas"]["CycleReport"] | null;
+        };
+        /** CyclePauseChange */
+        CyclePauseChange: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            op: "cycle_pause";
+            /**
+             * Cycle Id
+             * Format: uuid
+             */
+            cycle_id: string;
+            /** Title */
+            title: string;
         };
         /** CycleReport */
         CycleReport: {
@@ -1187,6 +1352,32 @@ export interface components {
              */
             freezable: string[];
         };
+        /**
+         * HabitScheduleChange
+         * @description The schedule of a habit is fixed: the old habit goes to the archive with its
+         *     history, and a new one with the lighter schedule takes its place.
+         */
+        HabitScheduleChange: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            op: "habit_schedule";
+            /**
+             * Habit Id
+             * Format: uuid
+             */
+            habit_id: string;
+            /** Title */
+            title: string;
+            from_frequency: components["schemas"]["HabitFrequency"];
+            /** From Weekdays */
+            from_weekdays: number[] | null;
+            /** From Times Per Week */
+            from_times_per_week: number | null;
+            /** To Times Per Week */
+            to_times_per_week: number;
+        };
         /** HabitUndoOut */
         HabitUndoOut: {
             habit: components["schemas"]["HabitOut"];
@@ -1208,6 +1399,30 @@ export interface components {
              * @description null removes the link
              */
             goal_id?: string | null;
+        };
+        /** ItemStatOut */
+        ItemStatOut: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "quest" | "habit";
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Title */
+            title: string;
+            category: components["schemas"]["QuestCategory"];
+            /** Planned */
+            planned: number;
+            /** Done */
+            done: number;
+            /** Skipped */
+            skipped: number;
+            /** Rate */
+            rate: number | null;
         };
         /** LedgerEntryOut */
         LedgerEntryOut: {
@@ -1476,12 +1691,60 @@ export interface components {
             /** Occurrences */
             occurrences: components["schemas"]["OccurrenceOut"][];
         };
+        /** QuestDueChange */
+        QuestDueChange: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            op: "quest_due";
+            /**
+             * Quest Id
+             * Format: uuid
+             */
+            quest_id: string;
+            /** Title */
+            title: string;
+            /** From Due */
+            from_due: string | null;
+            /**
+             * To Due
+             * Format: date-time
+             */
+            to_due: string;
+        };
         /** QuestListOut */
         QuestListOut: {
             /** Items */
             items: components["schemas"]["QuestOut"][];
             /** Total */
             total: number;
+        };
+        /**
+         * QuestMinutesChange
+         * @description Daily minutes of a learning quest; the reward follows the new plan.
+         */
+        QuestMinutesChange: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            op: "quest_minutes";
+            /**
+             * Quest Id
+             * Format: uuid
+             */
+            quest_id: string;
+            /** Title */
+            title: string;
+            /** From Minutes */
+            from_minutes: number;
+            /** To Minutes */
+            to_minutes: number;
+            /** From Xp */
+            from_xp: number;
+            /** To Xp */
+            to_xp: number;
         };
         /** QuestOut */
         QuestOut: {
@@ -1569,6 +1832,28 @@ export interface components {
              */
             goal_id?: string | null;
         };
+        /** QuestWeekdaysChange */
+        QuestWeekdaysChange: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            op: "quest_weekdays";
+            /**
+             * Quest Id
+             * Format: uuid
+             */
+            quest_id: string;
+            /** Title */
+            title: string;
+            /**
+             * From Weekdays
+             * @description null: every day
+             */
+            from_weekdays: number[] | null;
+            /** To Weekdays */
+            to_weekdays: number[];
+        };
         /**
          * Rarity
          * @enum {string}
@@ -1586,6 +1871,30 @@ export interface components {
                 [key: string]: string | number;
             };
         };
+        /** RecommendationApplyIn */
+        RecommendationApplyIn: {
+            /**
+             * Changes
+             * @description Indexes of the changes to apply; all of them by default
+             */
+            changes?: number[] | null;
+        };
+        /** RecommendationApplyOut */
+        RecommendationApplyOut: {
+            recommendation: components["schemas"]["AdaptiveRecommendationOut"];
+            /** Applied */
+            applied: number;
+        };
+        /**
+         * RecommendationStatus
+         * @enum {string}
+         */
+        RecommendationStatus: "pending" | "applied" | "dismissed" | "expired";
+        /**
+         * RecommendationType
+         * @enum {string}
+         */
+        RecommendationType: "overload" | "stalled_item" | "too_easy" | "rest";
         /** RefreshIn */
         RefreshIn: {
             /** Refresh Token */
@@ -1806,6 +2115,53 @@ export interface components {
             input?: unknown;
             /** Context */
             ctx?: Record<string, never>;
+        };
+        /**
+         * WindowOut
+         * @description Plan against reality over the last complete days (today is still open).
+         */
+        WindowOut: {
+            /** Days */
+            days: number;
+            /**
+             * First Day
+             * Format: date
+             */
+            first_day: string;
+            /**
+             * Last Day
+             * Format: date
+             */
+            last_day: string;
+            /** Planned */
+            planned: number;
+            /** Done */
+            done: number;
+            /** Skipped */
+            skipped: number;
+            /**
+             * Rate
+             * @description Share of the plan done, null without a plan
+             */
+            rate: number | null;
+            /** Quests Planned */
+            quests_planned: number;
+            /** Quests Done */
+            quests_done: number;
+            /** Habits Planned */
+            habits_planned: number;
+            /** Habits Done */
+            habits_done: number;
+            /** Learning Minutes Planned */
+            learning_minutes_planned: number;
+            /** Learning Minutes Done */
+            learning_minutes_done: number;
+            /** Active Days */
+            active_days: number;
+            /** Xp */
+            xp: number;
+            /** Categories */
+            categories: components["schemas"]["CategoryStatOut"][];
         };
         /** XpHistoryOut */
         XpHistoryOut: {
@@ -3046,6 +3402,114 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CycleCompletionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    summary_api_v1_adaptive_summary_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalysisOut"];
+                };
+            };
+        };
+    };
+    list_recommendations_api_v1_adaptive_recommendations_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdaptiveRecommendationOut"][];
+                };
+            };
+        };
+    };
+    apply_recommendation_api_v1_adaptive_recommendations__recommendation_id__apply_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Idempotency-Key"?: string | null;
+            };
+            path: {
+                recommendation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["RecommendationApplyIn"] | null;
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecommendationApplyOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    dismiss_recommendation_api_v1_adaptive_recommendations__recommendation_id__dismiss_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                recommendation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdaptiveRecommendationOut"];
                 };
             };
             /** @description Validation Error */

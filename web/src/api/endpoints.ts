@@ -1,6 +1,8 @@
 import { ApiClient } from "./client";
 import type {
   Achievement,
+  AdaptiveRecommendation,
+  Analysis,
   Attribute,
   Completion,
   Cycle,
@@ -26,6 +28,7 @@ import type {
   QuestStatus,
   QuestType,
   Quest,
+  RecommendationApplyResult,
   RegisterData,
   SkipResult,
   Statistics,
@@ -101,6 +104,16 @@ export const api = {
     client.request<Cycle>("PATCH", `/cycles/${cycleId}/goals/${goalId}`, { body: patch }),
   deleteGoal: (cycleId: string, goalId: string) =>
     client.request<Cycle>("DELETE", `/cycles/${cycleId}/goals/${goalId}`),
+
+  analysis: () => client.request<Analysis>("GET", "/adaptive/summary"),
+  recommendations: () => client.request<AdaptiveRecommendation[]>("GET", "/adaptive/recommendations"),
+  applyRecommendation: (id: string, changes: number[], idempotencyKey: string) =>
+    client.request<RecommendationApplyResult>("POST", `/adaptive/recommendations/${id}/apply`, {
+      body: { changes },
+      idempotencyKey,
+    }),
+  dismissRecommendation: (id: string) =>
+    client.request<AdaptiveRecommendation>("POST", `/adaptive/recommendations/${id}/dismiss`),
 
   achievements: () => client.request<Achievement[]>("GET", "/achievements"),
   unlockedAchievements: () => client.request<Achievement[]>("GET", "/achievements/unlocked"),

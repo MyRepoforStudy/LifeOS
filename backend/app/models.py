@@ -35,6 +35,8 @@ from app.domain.enums import (
     QuestStatus,
     QuestType,
     Rarity,
+    RecommendationStatus,
+    RecommendationType,
 )
 
 
@@ -196,6 +198,9 @@ class Quest(Base):
     checklist: Mapped[list[dict[str, Any]]] = mapped_column(JSONB, server_default=text("'[]'::jsonb"))
     # Goal of a life cycle this quest counts towards.
     goal_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("cycle_goals.id", ondelete="SET NULL"), index=True)
+    # Earlier plans, oldest first: [{"until": "YYYY-MM-DD", "weekdays": [...] | null,
+    # "target_minutes": int | null}]. Past days are analysed by the plan of that time.
+    plan_history: Mapped[list[dict[str, Any]]] = mapped_column(JSONB, server_default=text("'[]'::jsonb"))
     starts_at: Mapped[datetime]
     # Local date of starts_at, fixed at creation. One-off quests have exactly one
     # occurrence on this date, so the idempotency key never depends on when the
@@ -419,3 +424,42 @@ class CycleGoal(Base):
     sort_order: Mapped[int] = mapped_column(Integer, server_default="0")
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
+
+
+class AdaptiveRecommendation(Base):
+    """A suggested change of the plan. Nothing changes until the player applies it.
+
+    target_key identifies what the advice is about ("overload", "stalled:quest:<id>"...):
+    at most one pending recommendation per key, and a dismissed key rests for a while.
+    """
+
+    __tablename__ = "adaptive_recommendations"
+    __table_args__ = (
+        CheckConstraint(_in("recommendation_type", RecommendationType), name="type_valid"),
+        CheckConstraint(_in("status", RecommendationStatus), name="status_valid"),
+        Index(
+            "uq_adaptive_recommendations_one_pending_per_key",
+            "user_id",
+            "target_key",
+            unique=True,
+            postgresql_where=text("status = 'pending'"),
+        ),
+        Index("ix_adaptive_recommendations_user_id_created_at", "user_id", "created_at"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=new_id)
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    recommendation_type: Mapped[str] = mapped_column(String(30))
+    target_key: Mapped[str] = mapped_column(String(120))
+    # English fallback texts; the client shows localized ones by type and params.
+    title: Mapped[str] = mapped_column(String(200))
+    description: Mapped[str] = mapped_column(Text)
+    params: Mapped[dict[str, Any]] = mapped_column(JSONB, server_default=text("'{}'::jsonb"))
+    suggested_changes: Mapped[list[dict[str, Any]]] = mapped_column(JSONB, server_default=text("'[]'::jsonb"))
+    status: Mapped[str] = mapped_column(String(20), server_default=RecommendationStatus.PENDING.value)
+    # Both are set by the service from the request time (the clock tests can move).
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    applied_at: Mapped[datetime | None]
+    dismissed_at: Mapped[datetime | None]
+    expired_at: Mapped[datetime | None]

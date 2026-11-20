@@ -13,7 +13,8 @@
 | Клиент (PWA: React + TypeScript + Vite): главная, квесты, профиль | готово |
 | Фаза 3 — привычки, серии с заморозками, 20 достижений | готово |
 | Фаза 4 — циклы: цели, пауза, итоговый отчёт и награда | готово |
-| Фазы 5–6 — Adaptive Engine, аналитика | дальше |
+| Фаза 5 — Adaptive Engine: анализ активности, советы с подтверждением | готово |
+| Фаза 6 — аналитика и полировка | дальше |
 
 Принятые решения по ТЗ и отклонения от него — в [docs/decisions.md](docs/decisions.md).
 
@@ -22,13 +23,13 @@
 ```
 backend/
   app/domain/      правила игры без БД: уровни, награды, локальные даты
-  app/services/    сценарии: XP Ledger, квесты, привычки, достижения, циклы, профиль
+  app/services/    сценарии: XP Ledger, квесты, привычки, достижения, циклы, советы, профиль
   app/routers/     HTTP API /api/v1
   migrations/      миграции Alembic
   tests/           тесты на настоящем PostgreSQL
 web/
   src/api/         клиент API: токены, повторы, Idempotency-Key, типы из OpenAPI
-  src/pages/       экраны: главная, квесты, привычки, циклы, достижения, профиль
+  src/pages/       экраны: главная, квесты, привычки, циклы, анализ и советы, достижения, профиль
   src/components/  интерфейс Premium Dark
   src/i18n/        тексты RU и EN
 scripts/           devdb.ps1 (PostgreSQL), dev.ps1, prod.ps1, backup.ps1, autostart.ps1
@@ -180,6 +181,9 @@ cd web; npm.cmd test; npm.cmd run build; cd ..        # клиент: тесты
 | `GET/PATCH/DELETE /cycles/{id}` | цикл с прогрессом или отчётом; DELETE отменяет цикл |
 | `POST /cycles/{id}/pause`, `/resume`, `/complete` | пауза, продолжение, подвести итоги |
 | `POST /cycles/{id}/goals`, `PATCH/DELETE /cycles/{id}/goals/{goal_id}` | цели цикла |
+| `GET /adaptive/summary` | план и сделанное за 7 и 30 дней, что чаще срывается |
+| `GET /adaptive/recommendations` | советы: запрос обновляет их, но план не меняет |
+| `POST /adaptive/recommendations/{id}/apply`, `/dismiss` | применить выбранные изменения или отказаться |
 | `GET /config/levels`, `/config/rewards` | таблица уровней и награды с сервера |
 
 POST-запросы принимают заголовок `Idempotency-Key`. Повтор с тем же ключом

@@ -10,6 +10,7 @@ import { CyclesPage } from "./pages/CyclesPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { HabitDetailPage } from "./pages/HabitDetailPage";
 import { HabitsPage } from "./pages/HabitsPage";
+import { InsightsPage } from "./pages/InsightsPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { QuestDetailPage } from "./pages/QuestDetailPage";
 import { QuestsPage } from "./pages/QuestsPage";
@@ -53,6 +54,7 @@ export function App() {
           <Route path="cycles" element={<CyclesPage />} />
           <Route path="cycles/:id" element={<CycleDetailPage />} />
           <Route path="achievements" element={<AchievementsPage />} />
+          <Route path="insights" element={<InsightsPage />} />
           <Route path="profile" element={<ProfilePage />} />
         </Route>
         <Route path="login" element={<AuthPage mode="login" />} />

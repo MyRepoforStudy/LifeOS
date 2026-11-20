@@ -8,6 +8,7 @@ import { CycleCard } from "../components/CycleCard";
 import { HabitForm } from "../components/HabitForm";
 import { HabitRow } from "../components/HabitRow";
 import { Icon } from "../components/Icon";
+import { InsightsCard } from "../components/InsightsCard";
 import { ProgressBar } from "../components/ProgressBar";
 import { QuestForm } from "../components/QuestForm";
 import { ATTRIBUTE_COLOR, QuestRow } from "../components/QuestRow";
@@ -285,6 +286,7 @@ export function DashboardPage() {
         <div className="stack">
           <Hero />
           <CycleCard />
+          <InsightsCard />
           <Attributes />
           <RecentAchievements />
         </div>

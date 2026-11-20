@@ -22,18 +22,10 @@ import { Icon } from "./Icon";
 import { ProgressBar } from "./ProgressBar";
 import { useRewardRules } from "./QuestForm";
 import { ATTRIBUTE_COLOR } from "./QuestRow";
+import { Stat } from "./Stat";
 
 type Translate = ReturnType<typeof useI18n>["t"];
 type GoalLike = Pick<Goal, "title" | "metric" | "target_value" | "current_value" | "unit" | "done">;
-
-function Stat({ label, value, gold }: { label: string; value: ReactNode; gold?: boolean }) {
-  return (
-    <div className="stat">
-      <div className="faint small">{label}</div>
-      <div className={gold ? "stat-value num gold" : "stat-value num"}>{value}</div>
-    </div>
-  );
-}
 
 function CycleTitle({ cycle }: { cycle: Cycle }) {
   const { t, errorText } = useI18n();

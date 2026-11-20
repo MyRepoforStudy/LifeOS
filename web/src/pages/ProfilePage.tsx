@@ -142,6 +142,14 @@ export function ProfilePage() {
         </span>
       </Link>
 
+      <Link to="/insights" className="card spread" style={{ padding: "14px 18px" }}>
+        <span className="row" style={{ fontWeight: 600 }}>
+          <Icon name="bulb" width={20} height={20} style={{ color: "var(--gold)" }} />
+          {t("insights.open")}
+        </span>
+        <Icon name="next" width={18} height={18} />
+      </Link>
+
       <section className="card">
         <XpChart />
       </section>

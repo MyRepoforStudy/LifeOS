@@ -5,7 +5,7 @@ Lock order for every write path: quest row -> occurrence row -> player profile.
 
 import uuid
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 from sqlalchemy import exists, func, select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
@@ -120,6 +120,21 @@ def _actionable_date(quest: Quest, tz: str, now: datetime) -> date:
             raise Conflict("The quest is not scheduled for today", code="not_scheduled_today")
         raise Conflict("The quest has expired", code="quest_expired")
     return occurrence_date
+
+
+def remember_plan(quest: Quest, today: date) -> None:
+    """Keep the plan in effect until yesterday before it changes: the past is analysed by it.
+
+    A new plan applies from today. Two changes on one day keep the plan of yesterday.
+    """
+    if today <= quest.anchor_date:
+        return  # the quest has no past days yet
+    until = (today - timedelta(days=1)).isoformat()
+    history = list(quest.plan_history or [])
+    if history and history[-1]["until"] >= until:
+        return
+    history.append({"until": until, "weekdays": quest.weekdays, "target_minutes": quest.target_minutes})
+    quest.plan_history = history
 
 
 # --- views ----------------------------------------------------------------------------
@@ -331,6 +346,8 @@ async def update_quest(
     if "weekdays" in fields:
         if not (quest.quest_type == QuestType.DAILY and quest.is_recurring):
             raise InvalidRequest("weekdays apply only to recurring daily quests", code="weekdays_not_applicable")
+        if data.weekdays != quest.weekdays:
+            remember_plan(quest, dates.local_date(effective_timezone(user, now), now))
         quest.weekdays = data.weekdays
     if "checklist" in fields:
         quest.checklist = [item.model_dump() for item in data.checklist or []]

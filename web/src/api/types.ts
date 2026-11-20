@@ -69,6 +69,13 @@ export interface HabitPatch {
   goal_id?: string | null;
 }
 
+export type Analysis = Schemas["AnalysisOut"];
+export type AnalysisWindow = Schemas["WindowOut"];
+export type ItemStat = Schemas["ItemStatOut"];
+export type AdaptiveRecommendation = Schemas["AdaptiveRecommendationOut"];
+export type RecommendationApplyResult = Schemas["RecommendationApplyOut"];
+export type PlanChange = AdaptiveRecommendation["changes"][number];
+
 export type Achievement = Schemas["AchievementOut"];
 export type Rarity = Schemas["Rarity"];
 export type AchievementCategory = Schemas["AchievementCategory"];

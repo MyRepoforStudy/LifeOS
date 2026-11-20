@@ -36,6 +36,10 @@ export const keys = {
   cycleList: ["cycles", "list"] as const,
   currentCycle: ["cycles", "current"] as const,
   cycle: (id: string) => ["cycle", id] as const,
+  /** Prefix of the analysis and the recommendations. */
+  adaptive: ["adaptive"] as const,
+  analysis: ["adaptive", "analysis"] as const,
+  recommendations: ["adaptive", "recommendations"] as const,
 };
 
 /** Goal progress and links live in the cycle views. */
@@ -69,6 +73,7 @@ function invalidatePlayerData(queryClient: QueryClient): Promise<unknown> {
       keys.achievements,
       keys.cycles,
       ["cycle"],
+      keys.adaptive,
     ].map((queryKey) => queryClient.invalidateQueries({ queryKey })),
   );
 }
@@ -87,6 +92,9 @@ export const useAchievements = () => useQuery({ queryKey: keys.achievements, que
 export const useCycles = () => useQuery({ queryKey: keys.cycleList, queryFn: api.cycles });
 export const useCurrentCycle = () => useQuery({ queryKey: keys.currentCycle, queryFn: api.currentCycle });
 export const useCycle = (id: string) => useQuery({ queryKey: keys.cycle(id), queryFn: () => api.cycle(id) });
+export const useAnalysis = () => useQuery({ queryKey: keys.analysis, queryFn: api.analysis });
+/** Asking refreshes the advice on the server; the plan changes only on apply. */
+export const useRecommendations = () => useQuery({ queryKey: keys.recommendations, queryFn: api.recommendations });
 
 /** Each user action gets one Idempotency-Key, reused if the request is retried. */
 export function useCompleteQuest(onDone?: (result: Completion) => void) {
@@ -297,5 +305,29 @@ export function useDeleteGoal(cycleId: string) {
           queryClient.invalidateQueries({ queryKey }),
         ),
       ]),
+  });
+}
+
+export function useApplyRecommendation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, changes, key = newId() }: { id: string; changes: number[]; key?: string }) =>
+      api.applyRecommendation(id, changes, key),
+    // Applied changes touch quests, habits or the cycle; an outdated advice gets refreshed.
+    onSettled: () =>
+      Promise.all([
+        ...[keys.allQuests, ["quest"], keys.habits, ["habit"], keys.adaptive].map((queryKey) =>
+          queryClient.invalidateQueries({ queryKey }),
+        ),
+        invalidateCycles(queryClient),
+      ]),
+  });
+}
+
+export function useDismissRecommendation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.dismissRecommendation(id),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: keys.adaptive }),
   });
 }

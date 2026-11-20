@@ -2120,6 +2120,195 @@
         }
       }
     },
+    "/api/v1/adaptive/summary": {
+      "get": {
+        "tags": [
+          "adaptive"
+        ],
+        "summary": "Summary",
+        "description": "Plan against reality for the last 7 and 30 complete days (today is still open).",
+        "operationId": "summary_api_v1_adaptive_summary_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalysisOut"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/adaptive/recommendations": {
+      "get": {
+        "tags": [
+          "adaptive"
+        ],
+        "summary": "List Recommendations",
+        "description": "Pending recommendations first, then recent decisions.\n\nAsking refreshes them: new ones appear when the last days call for it, outdated\nones expire. The plan itself changes only when a recommendation is applied.",
+        "operationId": "list_recommendations_api_v1_adaptive_recommendations_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AdaptiveRecommendationOut"
+                  },
+                  "type": "array",
+                  "title": "Response List Recommendations Api V1 Adaptive Recommendations Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/adaptive/recommendations/{recommendation_id}/apply": {
+      "post": {
+        "tags": [
+          "adaptive"
+        ],
+        "summary": "Apply Recommendation",
+        "description": "Apply the chosen changes (all by default) together, or none if the plan has changed.",
+        "operationId": "apply_recommendation_api_v1_adaptive_recommendations__recommendation_id__apply_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "recommendation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Recommendation Id"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/RecommendationApplyIn"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Data"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecommendationApplyOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/adaptive/recommendations/{recommendation_id}/dismiss": {
+      "post": {
+        "tags": [
+          "adaptive"
+        ],
+        "summary": "Dismiss Recommendation",
+        "description": "Nothing changes; the same advice does not come back for a while.",
+        "operationId": "dismiss_recommendation_api_v1_adaptive_recommendations__recommendation_id__dismiss_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "recommendation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Recommendation Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdaptiveRecommendationOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/achievements": {
       "get": {
         "tags": [
@@ -2396,6 +2585,176 @@
         "title": "Activity",
         "description": "What the quest is about; decides which reward rule applies."
       },
+      "AdaptiveRecommendationOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "recommendation_type": {
+            "$ref": "#/components/schemas/RecommendationType"
+          },
+          "status": {
+            "$ref": "#/components/schemas/RecommendationStatus"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "English fallback; clients localize by type and params"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "params": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Params"
+          },
+          "changes": {
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/QuestMinutesChange"
+                },
+                {
+                  "$ref": "#/components/schemas/QuestWeekdaysChange"
+                },
+                {
+                  "$ref": "#/components/schemas/QuestDueChange"
+                },
+                {
+                  "$ref": "#/components/schemas/HabitScheduleChange"
+                },
+                {
+                  "$ref": "#/components/schemas/CyclePauseChange"
+                }
+              ],
+              "discriminator": {
+                "propertyName": "op",
+                "mapping": {
+                  "cycle_pause": "#/components/schemas/CyclePauseChange",
+                  "habit_schedule": "#/components/schemas/HabitScheduleChange",
+                  "quest_due": "#/components/schemas/QuestDueChange",
+                  "quest_minutes": "#/components/schemas/QuestMinutesChange",
+                  "quest_weekdays": "#/components/schemas/QuestWeekdaysChange"
+                }
+              }
+            },
+            "type": "array",
+            "title": "Changes"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "applied_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Applied At"
+          },
+          "dismissed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dismissed At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "recommendation_type",
+          "status",
+          "title",
+          "description",
+          "params",
+          "changes",
+          "created_at",
+          "updated_at",
+          "applied_at",
+          "dismissed_at"
+        ],
+        "title": "AdaptiveRecommendationOut"
+      },
+      "AnalysisOut": {
+        "properties": {
+          "today": {
+            "type": "string",
+            "format": "date",
+            "title": "Today"
+          },
+          "week": {
+            "$ref": "#/components/schemas/WindowOut"
+          },
+          "month": {
+            "$ref": "#/components/schemas/WindowOut"
+          },
+          "previous_week_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Previous Week Rate",
+            "description": "The 7 days before the last 7; null when that week had too little plan to compare with"
+          },
+          "struggling": {
+            "items": {
+              "$ref": "#/components/schemas/ItemStatOut"
+            },
+            "type": "array",
+            "title": "Struggling",
+            "description": "Items most often missed in the last 14 days"
+          }
+        },
+        "type": "object",
+        "required": [
+          "today",
+          "week",
+          "month",
+          "previous_week_rate",
+          "struggling"
+        ],
+        "title": "AnalysisOut"
+      },
       "AttributeOut": {
         "properties": {
           "level": {
@@ -2471,6 +2830,40 @@
           "finance"
         ],
         "title": "AttributeType"
+      },
+      "CategoryStatOut": {
+        "properties": {
+          "category": {
+            "$ref": "#/components/schemas/QuestCategory"
+          },
+          "planned": {
+            "type": "integer",
+            "title": "Planned"
+          },
+          "done": {
+            "type": "integer",
+            "title": "Done"
+          },
+          "rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rate"
+          }
+        },
+        "type": "object",
+        "required": [
+          "category",
+          "planned",
+          "done",
+          "rate"
+        ],
+        "title": "CategoryStatOut"
       },
       "ChecklistItem": {
         "properties": {
@@ -2788,6 +3181,31 @@
           "report"
         ],
         "title": "CycleOut"
+      },
+      "CyclePauseChange": {
+        "properties": {
+          "op": {
+            "type": "string",
+            "const": "cycle_pause",
+            "title": "Op",
+            "default": "cycle_pause"
+          },
+          "cycle_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Cycle Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          }
+        },
+        "type": "object",
+        "required": [
+          "cycle_id",
+          "title"
+        ],
+        "title": "CyclePauseChange"
       },
       "CycleReport": {
         "properties": {
@@ -3721,6 +4139,68 @@
         ],
         "title": "HabitOut"
       },
+      "HabitScheduleChange": {
+        "properties": {
+          "op": {
+            "type": "string",
+            "const": "habit_schedule",
+            "title": "Op",
+            "default": "habit_schedule"
+          },
+          "habit_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Habit Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "from_frequency": {
+            "$ref": "#/components/schemas/HabitFrequency"
+          },
+          "from_weekdays": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From Weekdays"
+          },
+          "from_times_per_week": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From Times Per Week"
+          },
+          "to_times_per_week": {
+            "type": "integer",
+            "title": "To Times Per Week"
+          }
+        },
+        "type": "object",
+        "required": [
+          "habit_id",
+          "title",
+          "from_frequency",
+          "from_weekdays",
+          "from_times_per_week",
+          "to_times_per_week"
+        ],
+        "title": "HabitScheduleChange",
+        "description": "The schedule of a habit is fixed: the old habit goes to the archive with its\nhistory, and a new one with the lighter schedule takes its place."
+      },
       "HabitUndoOut": {
         "properties": {
           "habit": {
@@ -3787,6 +4267,65 @@
         "type": "object",
         "title": "HabitUpdateIn",
         "description": "The schedule is fixed: changing it would rewrite the streak history."
+      },
+      "ItemStatOut": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "quest",
+              "habit"
+            ],
+            "title": "Kind"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "category": {
+            "$ref": "#/components/schemas/QuestCategory"
+          },
+          "planned": {
+            "type": "integer",
+            "title": "Planned"
+          },
+          "done": {
+            "type": "integer",
+            "title": "Done"
+          },
+          "skipped": {
+            "type": "integer",
+            "title": "Skipped"
+          },
+          "rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rate"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "id",
+          "title",
+          "category",
+          "planned",
+          "done",
+          "skipped",
+          "rate"
+        ],
+        "title": "ItemStatOut"
       },
       "LedgerEntryOut": {
         "properties": {
@@ -4663,6 +5202,50 @@
         ],
         "title": "QuestDetailOut"
       },
+      "QuestDueChange": {
+        "properties": {
+          "op": {
+            "type": "string",
+            "const": "quest_due",
+            "title": "Op",
+            "default": "quest_due"
+          },
+          "quest_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Quest Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "from_due": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From Due"
+          },
+          "to_due": {
+            "type": "string",
+            "format": "date-time",
+            "title": "To Due"
+          }
+        },
+        "type": "object",
+        "required": [
+          "quest_id",
+          "title",
+          "from_due",
+          "to_due"
+        ],
+        "title": "QuestDueChange"
+      },
       "QuestListOut": {
         "properties": {
           "items": {
@@ -4683,6 +5266,52 @@
           "total"
         ],
         "title": "QuestListOut"
+      },
+      "QuestMinutesChange": {
+        "properties": {
+          "op": {
+            "type": "string",
+            "const": "quest_minutes",
+            "title": "Op",
+            "default": "quest_minutes"
+          },
+          "quest_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Quest Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "from_minutes": {
+            "type": "integer",
+            "title": "From Minutes"
+          },
+          "to_minutes": {
+            "type": "integer",
+            "title": "To Minutes"
+          },
+          "from_xp": {
+            "type": "integer",
+            "title": "From Xp"
+          },
+          "to_xp": {
+            "type": "integer",
+            "title": "To Xp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "quest_id",
+          "title",
+          "from_minutes",
+          "to_minutes",
+          "from_xp",
+          "to_xp"
+        ],
+        "title": "QuestMinutesChange",
+        "description": "Daily minutes of a learning quest; the reward follows the new plan."
       },
       "QuestOut": {
         "properties": {
@@ -4986,6 +5615,55 @@
         "title": "QuestUpdateIn",
         "description": "Only descriptive fields can change; type, difficulty and reward are fixed at creation."
       },
+      "QuestWeekdaysChange": {
+        "properties": {
+          "op": {
+            "type": "string",
+            "const": "quest_weekdays",
+            "title": "Op",
+            "default": "quest_weekdays"
+          },
+          "quest_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Quest Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "from_weekdays": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From Weekdays",
+            "description": "null: every day"
+          },
+          "to_weekdays": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "To Weekdays"
+          }
+        },
+        "type": "object",
+        "required": [
+          "quest_id",
+          "title",
+          "from_weekdays",
+          "to_weekdays"
+        ],
+        "title": "QuestWeekdaysChange"
+      },
       "Rarity": {
         "type": "string",
         "enum": [
@@ -5023,6 +5701,67 @@
         ],
         "title": "Recommendation",
         "description": "A rule-based hint for the next cycle; the client words it by `code`."
+      },
+      "RecommendationApplyIn": {
+        "properties": {
+          "changes": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer",
+                  "minimum": 0.0
+                },
+                "type": "array",
+                "maxItems": 10
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Changes",
+            "description": "Indexes of the changes to apply; all of them by default"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "RecommendationApplyIn"
+      },
+      "RecommendationApplyOut": {
+        "properties": {
+          "recommendation": {
+            "$ref": "#/components/schemas/AdaptiveRecommendationOut"
+          },
+          "applied": {
+            "type": "integer",
+            "title": "Applied"
+          }
+        },
+        "type": "object",
+        "required": [
+          "recommendation",
+          "applied"
+        ],
+        "title": "RecommendationApplyOut"
+      },
+      "RecommendationStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "applied",
+          "dismissed",
+          "expired"
+        ],
+        "title": "RecommendationStatus"
+      },
+      "RecommendationType": {
+        "type": "string",
+        "enum": [
+          "overload",
+          "stalled_item",
+          "too_easy",
+          "rest"
+        ],
+        "title": "RecommendationType"
       },
       "RefreshIn": {
         "properties": {
@@ -5474,6 +6213,108 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "WindowOut": {
+        "properties": {
+          "days": {
+            "type": "integer",
+            "title": "Days"
+          },
+          "first_day": {
+            "type": "string",
+            "format": "date",
+            "title": "First Day"
+          },
+          "last_day": {
+            "type": "string",
+            "format": "date",
+            "title": "Last Day"
+          },
+          "planned": {
+            "type": "integer",
+            "title": "Planned"
+          },
+          "done": {
+            "type": "integer",
+            "title": "Done"
+          },
+          "skipped": {
+            "type": "integer",
+            "title": "Skipped"
+          },
+          "rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rate",
+            "description": "Share of the plan done, null without a plan"
+          },
+          "quests_planned": {
+            "type": "integer",
+            "title": "Quests Planned"
+          },
+          "quests_done": {
+            "type": "integer",
+            "title": "Quests Done"
+          },
+          "habits_planned": {
+            "type": "integer",
+            "title": "Habits Planned"
+          },
+          "habits_done": {
+            "type": "integer",
+            "title": "Habits Done"
+          },
+          "learning_minutes_planned": {
+            "type": "integer",
+            "title": "Learning Minutes Planned"
+          },
+          "learning_minutes_done": {
+            "type": "integer",
+            "title": "Learning Minutes Done"
+          },
+          "active_days": {
+            "type": "integer",
+            "title": "Active Days"
+          },
+          "xp": {
+            "type": "integer",
+            "title": "Xp"
+          },
+          "categories": {
+            "items": {
+              "$ref": "#/components/schemas/CategoryStatOut"
+            },
+            "type": "array",
+            "title": "Categories"
+          }
+        },
+        "type": "object",
+        "required": [
+          "days",
+          "first_day",
+          "last_day",
+          "planned",
+          "done",
+          "skipped",
+          "rate",
+          "quests_planned",
+          "quests_done",
+          "habits_planned",
+          "habits_done",
+          "learning_minutes_planned",
+          "learning_minutes_done",
+          "active_days",
+          "xp",
+          "categories"
+        ],
+        "title": "WindowOut",
+        "description": "Plan against reality over the last complete days (today is still open)."
       },
       "XpHistoryOut": {
         "properties": {
