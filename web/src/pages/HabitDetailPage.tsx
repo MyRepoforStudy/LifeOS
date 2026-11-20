@@ -5,11 +5,34 @@ import { ApiError } from "../api/client";
 import { useArchiveHabit, useHabit, useUpdateHabit } from "../api/queries";
 import type { HabitDay, HabitDetail } from "../api/types";
 import { useFeedback } from "../components/Feedback";
+import { GoalLinkCard } from "../components/GoalSelect";
 import { canComplete, useHabitActions } from "../components/HabitRow";
 import { Icon } from "../components/Icon";
 import { useI18n, type MessageKey } from "../i18n";
+import { acceptedMetrics } from "../lib/cycles";
 import { formatDay, parseLocalDate } from "../lib/format";
 import { frequencyText, streakText } from "../lib/habits";
+
+const HABIT_METRICS = acceptedMetrics("habit");
+
+function HabitGoal({ habit }: { habit: HabitDetail }) {
+  const { t, errorText } = useI18n();
+  const { toast } = useFeedback();
+  const update = useUpdateHabit(habit.id);
+  return (
+    <GoalLinkCard
+      accepts={HABIT_METRICS}
+      value={habit.goal_id}
+      saving={update.isPending}
+      onSave={(goalId) =>
+        update.mutate(
+          { goal_id: goalId },
+          { onSuccess: () => toast(t("detail.saved")), onError: (e) => toast(errorText(e), "error") },
+        )
+      }
+    />
+  );
+}
 
 function History({ habit }: { habit: HabitDetail }) {
   const { t, locale } = useI18n();
@@ -233,6 +256,8 @@ export function HabitDetailPage() {
           ))}
         </section>
       )}
+
+      {habit.is_active && <HabitGoal habit={habit} />}
 
       <History habit={habit} />
     </main>

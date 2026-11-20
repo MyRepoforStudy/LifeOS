@@ -4,6 +4,7 @@ import { Link } from "react-router";
 import { useAchievements, useAttributes, useHabits, useProfile, useQuests, useXpHistory } from "../api/queries";
 import type { Attribute, LedgerEntry } from "../api/types";
 import { Avatar } from "../components/Avatar";
+import { CycleCard } from "../components/CycleCard";
 import { HabitForm } from "../components/HabitForm";
 import { HabitRow } from "../components/HabitRow";
 import { Icon } from "../components/Icon";
@@ -150,6 +151,7 @@ const LEDGER_REASONS = [
   "habit_completed",
   "habit_completion_undone",
   "achievement_unlocked",
+  "cycle_completed",
   "manual_adjustment",
 ] as const;
 
@@ -282,6 +284,7 @@ export function DashboardPage() {
       <div className="dashboard-grid">
         <div className="stack">
           <Hero />
+          <CycleCard />
           <Attributes />
           <RecentAchievements />
         </div>

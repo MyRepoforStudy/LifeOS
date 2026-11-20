@@ -3,10 +3,14 @@ import { useState, type FormEvent } from "react";
 import { useCreateHabit } from "../api/queries";
 import { CATEGORIES, type HabitDraft, type HabitFrequency, type QuestCategory } from "../api/types";
 import { useI18n, type MessageKey } from "../i18n";
+import { acceptedMetrics } from "../lib/cycles";
 import { newId } from "../lib/id";
 import { useFeedback } from "./Feedback";
+import { GoalSelect, useLinkableGoals } from "./GoalSelect";
 import { useRewardRules } from "./QuestForm";
 import { Sheet } from "./Sheet";
+
+const HABIT_METRICS = acceptedMetrics("habit");
 
 const WEEKDAYS = [1, 2, 3, 4, 5, 6, 7];
 const FREQUENCIES: { value: HabitFrequency; label: MessageKey }[] = [
@@ -29,7 +33,10 @@ export function HabitForm({ onClose }: { onClose: () => void }) {
   const [weekdays, setWeekdays] = useState<number[]>([1, 3, 5]);
   const [timesPerWeek, setTimesPerWeek] = useState(3);
   const [description, setDescription] = useState("");
+  const [goalId, setGoalId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { linkable } = useLinkableGoals(HABIT_METRICS);
+  const goal = linkable.some((item) => item.id === goalId) ? goalId : null;
 
   const toggleWeekday = (day: number) =>
     setWeekdays((current) =>
@@ -46,6 +53,7 @@ export function HabitForm({ onClose }: { onClose: () => void }) {
       description: description.trim() || null,
       weekdays: frequency === "weekdays" ? weekdays : null,
       times_per_week: frequency === "weekly" ? timesPerWeek : null,
+      goal_id: goal,
     };
     create.mutate(
       { draft, key: idempotencyKey },
@@ -158,6 +166,8 @@ export function HabitForm({ onClose }: { onClose: () => void }) {
             maxLength={5000}
           />
         </label>
+
+        <GoalSelect accepts={HABIT_METRICS} value={goal} onChange={setGoalId} />
 
         {error && <div className="form-error">{error}</div>}
 

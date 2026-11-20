@@ -3,10 +3,18 @@ import type {
   Achievement,
   Attribute,
   Completion,
+  Cycle,
+  CycleCompletion,
+  CycleDraft,
+  CyclePatch,
+  CycleSummary,
+  GoalDraft,
+  GoalPatch,
   Habit,
   HabitCompletion,
   HabitDetail,
   HabitDraft,
+  HabitPatch,
   HabitUndo,
   LevelTable,
   Profile,
@@ -67,8 +75,7 @@ export const api = {
   habit: (id: string) => client.request<HabitDetail>("GET", `/habits/${id}`),
   createHabit: (draft: HabitDraft, idempotencyKey: string) =>
     client.request<Habit>("POST", "/habits", { body: draft, idempotencyKey }),
-  updateHabit: (id: string, patch: { title?: string; description?: string | null }) =>
-    client.request<Habit>("PATCH", `/habits/${id}`, { body: patch }),
+  updateHabit: (id: string, patch: HabitPatch) => client.request<Habit>("PATCH", `/habits/${id}`, { body: patch }),
   archiveHabit: (id: string) => client.request<void>("DELETE", `/habits/${id}`),
   completeHabit: (id: string, idempotencyKey: string) =>
     client.request<HabitCompletion>("POST", `/habits/${id}/complete`, { idempotencyKey }),
@@ -76,6 +83,24 @@ export const api = {
     client.request<HabitUndo>("POST", `/habits/${id}/undo`, { idempotencyKey }),
   freezeHabit: (id: string, day: string, idempotencyKey: string) =>
     client.request<Habit>("POST", `/habits/${id}/freeze`, { body: { day }, idempotencyKey }),
+
+  cycles: () => client.request<CycleSummary[]>("GET", "/cycles"),
+  currentCycle: () => client.request<Cycle | null>("GET", "/cycles/current"),
+  cycle: (id: string) => client.request<Cycle>("GET", `/cycles/${id}`),
+  createCycle: (draft: CycleDraft, idempotencyKey: string) =>
+    client.request<Cycle>("POST", "/cycles", { body: draft, idempotencyKey }),
+  updateCycle: (id: string, patch: CyclePatch) => client.request<Cycle>("PATCH", `/cycles/${id}`, { body: patch }),
+  cancelCycle: (id: string) => client.request<void>("DELETE", `/cycles/${id}`),
+  pauseCycle: (id: string) => client.request<Cycle>("POST", `/cycles/${id}/pause`),
+  resumeCycle: (id: string) => client.request<Cycle>("POST", `/cycles/${id}/resume`),
+  completeCycle: (id: string, idempotencyKey: string) =>
+    client.request<CycleCompletion>("POST", `/cycles/${id}/complete`, { idempotencyKey }),
+  addGoal: (cycleId: string, draft: GoalDraft) =>
+    client.request<Cycle>("POST", `/cycles/${cycleId}/goals`, { body: draft }),
+  updateGoal: (cycleId: string, goalId: string, patch: GoalPatch) =>
+    client.request<Cycle>("PATCH", `/cycles/${cycleId}/goals/${goalId}`, { body: patch }),
+  deleteGoal: (cycleId: string, goalId: string) =>
+    client.request<Cycle>("DELETE", `/cycles/${cycleId}/goals/${goalId}`),
 
   achievements: () => client.request<Achievement[]>("GET", "/achievements"),
   unlockedAchievements: () => client.request<Achievement[]>("GET", "/achievements/unlocked"),

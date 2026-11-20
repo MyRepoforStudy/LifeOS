@@ -12,7 +12,8 @@
 | Авторизация: JWT + refresh-токены с ротацией, Argon2id | готово |
 | Клиент (PWA: React + TypeScript + Vite): главная, квесты, профиль | готово |
 | Фаза 3 — привычки, серии с заморозками, 20 достижений | готово |
-| Фазы 4–6 — циклы, Adaptive Engine, аналитика | дальше |
+| Фаза 4 — циклы: цели, пауза, итоговый отчёт и награда | готово |
+| Фазы 5–6 — Adaptive Engine, аналитика | дальше |
 
 Принятые решения по ТЗ и отклонения от него — в [docs/decisions.md](docs/decisions.md).
 
@@ -21,16 +22,16 @@
 ```
 backend/
   app/domain/      правила игры без БД: уровни, награды, локальные даты
-  app/services/    сценарии: XP Ledger, квесты, профиль, авторизация
+  app/services/    сценарии: XP Ledger, квесты, привычки, достижения, циклы, профиль
   app/routers/     HTTP API /api/v1
   migrations/      миграции Alembic
   tests/           тесты на настоящем PostgreSQL
 web/
   src/api/         клиент API: токены, повторы, Idempotency-Key, типы из OpenAPI
-  src/pages/       экраны: вход, главная, квесты, карточка квеста, профиль
+  src/pages/       экраны: главная, квесты, привычки, циклы, достижения, профиль
   src/components/  интерфейс Premium Dark
   src/i18n/        тексты RU и EN
-scripts/devdb.ps1  локальный PostgreSQL для разработки
+scripts/           devdb.ps1 (PostgreSQL), dev.ps1, prod.ps1, backup.ps1, autostart.ps1
 docs/              решения и документация
 ```
 
@@ -48,7 +49,7 @@ docs/              решения и документация
 ### Один раз: база и зависимости
 
 ```powershell
-# База данных: кластер, роль lifeos, базы lifeos и lifeos_test, пароли в backend\.env
+# База данных: кластер, роль lifeos, базы lifeos, lifeos_dev и lifeos_test, пароли в backend\.env
 powershell -ExecutionPolicy Bypass -File .\scripts\devdb.ps1 init
 
 # Зависимости бэкенда
@@ -70,8 +71,13 @@ powershell -ExecutionPolicy Bypass -File .\scripts\dev.ps1
 3. При первом запуске ставит зависимости клиента.
 4. Открывает два окна: «LifeOS API» (http://127.0.0.1:8000/docs) и «LifeOS Web».
 
+Режим разработки работает со своей базой `lifeos_dev` (адрес — `DEV_DATABASE_URL`
+в `backend\.env`): эксперименты и недописанные миграции не трогают настоящие данные
+в `lifeos`, с которой работает рабочий режим.
+
 Приложение открывается на **http://localhost:5173**. Чтобы остановить сервер,
-закрой его окно. Базу останавливает команда `.\scripts\devdb.ps1 stop`, а
+закрой его окно или запусти `dev.ps1 -Stop`; `dev.ps1 -Restart` перезапускает оба
+сервера. Базу останавливает команда `.\scripts\devdb.ps1 stop`, а
 `.\scripts\devdb.ps1 status` показывает, запущена ли она.
 
 **С телефона.** Запусти `dev.ps1 -Lan`: скрипт напечатает адрес вида
@@ -101,11 +107,17 @@ powershell -ExecutionPolicy Bypass -File .\scripts\backup.ps1        # резе�
 2. Делает резервную копию базы, но не чаще раза в сутки. Копии лежат в
    `Документы\LifeOS-backups`, хранятся последние 14.
 3. Применяет миграции.
-4. Пересобирает клиент, если менялись его исходники.
+4. Пересобирает клиент, если менялись его исходники. Сборка лежит в `web\dist-prod`,
+   её пишет только `prod.ps1`; `npm run build` при разработке пишет в `web\dist` и
+   работающее приложение не меняет.
 5. Поднимает сервер.
 
 Рабочий режим может работать одновременно с режимом разработки (`dev.ps1`, порты
 8000 и 5173). Логи пишутся в `%LOCALAPPDATA%\LifeOS\api.log`.
+
+**Обновление** после `git pull` или слияния веток:
+`prod.ps1 -Stop`, затем `prod.ps1`. Скрипт сделает резервную копию (если сегодня её
+ещё не было), применит миграции, пересоберёт клиент и запустит новую версию.
 
 Настройка Tailscale, один раз:
 1. Установи Tailscale на компьютер (`winget install --id Tailscale.Tailscale -e`) и
@@ -134,7 +146,7 @@ cd web; npm.cmd test; npm.cmd run build; cd ..        # клиент: тесты
 `backend\.venv\Scripts\python backend\scripts\export_openapi.py`, затем `npm.cmd run api:types` в `web`.
 
 `devdb.ps1 init` создаёт кластер в `%LOCALAPPDATA%\LifeOS\pgdata`, роль `lifeos`
-и базы `lifeos` и `lifeos_test`. Случайные пароли он записывает в `backend/.env`,
+и базы `lifeos`, `lifeos_dev` и `lifeos_test`. Случайные пароли он записывает в `backend/.env`,
 файл в git не попадает. Служба Windows и права администратора не нужны. Запускай
 его в обычном терминале: в изолированной среде (например, у AI-агента) кластер
 окажется виден только этой среде.
@@ -164,6 +176,10 @@ cd web; npm.cmd test; npm.cmd run build; cd ..        # клиент: тесты
 | `POST /habits/{id}/complete`, `/undo`, `/freeze` | отметить сегодня, отменить, заморозить пропуск |
 | `GET /habits/{id}/streak` | текущая и лучшая серия |
 | `GET /achievements`, `/achievements/unlocked` | каталог с прогрессом и полученные достижения |
+| `GET/POST /cycles`, `GET /cycles/current` | история циклов, новый цикл с целями, текущий цикл |
+| `GET/PATCH/DELETE /cycles/{id}` | цикл с прогрессом или отчётом; DELETE отменяет цикл |
+| `POST /cycles/{id}/pause`, `/resume`, `/complete` | пауза, продолжение, подвести итоги |
+| `POST /cycles/{id}/goals`, `PATCH/DELETE /cycles/{id}/goals/{goal_id}` | цели цикла |
 | `GET /config/levels`, `/config/rewards` | таблица уровней и награды с сервера |
 
 POST-запросы принимают заголовок `Idempotency-Key`. Повтор с тем же ключом

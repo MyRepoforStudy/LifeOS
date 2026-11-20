@@ -5,6 +5,8 @@ import { Layout } from "./components/Layout";
 import { useI18n } from "./i18n";
 import { AchievementsPage } from "./pages/AchievementsPage";
 import { AuthPage } from "./pages/AuthPage";
+import { CycleDetailPage } from "./pages/CycleDetailPage";
+import { CyclesPage } from "./pages/CyclesPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { HabitDetailPage } from "./pages/HabitDetailPage";
 import { HabitsPage } from "./pages/HabitsPage";
@@ -48,6 +50,8 @@ export function App() {
           <Route path="quests/:id" element={<QuestDetailPage />} />
           <Route path="habits" element={<HabitsPage />} />
           <Route path="habits/:id" element={<HabitDetailPage />} />
+          <Route path="cycles" element={<CyclesPage />} />
+          <Route path="cycles/:id" element={<CycleDetailPage />} />
           <Route path="achievements" element={<AchievementsPage />} />
           <Route path="profile" element={<ProfilePage />} />
         </Route>

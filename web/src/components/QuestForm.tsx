@@ -15,10 +15,12 @@ import {
   type QuestType,
 } from "../api/types";
 import { useI18n } from "../i18n";
+import { acceptedMetrics } from "../lib/cycles";
 import { fromDateTimeInput } from "../lib/format";
 import { newId } from "../lib/id";
 import { previewReward, type RewardRules } from "../lib/rewards";
 import { useFeedback } from "./Feedback";
+import { GoalSelect, useLinkableGoals } from "./GoalSelect";
 import { Sheet } from "./Sheet";
 
 const WEEKDAYS = [1, 2, 3, 4, 5, 6, 7] as const;
@@ -75,7 +77,13 @@ export function QuestForm({ initialType = "daily", onClose }: { initialType?: Qu
   const [due, setDue] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState(2);
+  const [goalId, setGoalId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Minutes goals only take learning quests; a pick that no longer fits is dropped.
+  const accepts = acceptedMetrics("quest", activity);
+  const { linkable } = useLinkableGoals(accepts);
+  const goal = linkable.some((item) => item.id === goalId) ? goalId : null;
 
   const oneOff = ONE_OFF.includes(questType);
   const showDifficulty = activity === "task" && questType !== "weekly";
@@ -102,6 +110,7 @@ export function QuestForm({ initialType = "daily", onClose }: { initialType?: Qu
       target_minutes: activity === "learning" ? minutes : null,
       weekdays: questType === "daily" && weekdays.length > 0 && weekdays.length < 7 ? weekdays : null,
       due_at: oneOff ? fromDateTimeInput(due) : null,
+      goal_id: goal,
     };
     create.mutate(
       { draft, key: idempotencyKey },
@@ -213,6 +222,8 @@ export function QuestForm({ initialType = "daily", onClose }: { initialType?: Qu
             maxLength={5000}
           />
         </label>
+
+        <GoalSelect accepts={accepts} value={goal} onChange={setGoalId} />
 
         <div className="field">
           <span>{t("form.priority")}</span>

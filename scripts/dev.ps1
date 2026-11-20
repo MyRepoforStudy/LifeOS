@@ -2,14 +2,16 @@
 .SYNOPSIS
     Start LifeOS for local development: PostgreSQL, migrations, API and web client.
 
-        powershell -ExecutionPolicy Bypass -File .\scripts\dev.ps1         # on this computer
-        powershell -ExecutionPolicy Bypass -File .\scripts\dev.ps1 -Lan    # also reachable from a phone on the same Wi-Fi
+        powershell -ExecutionPolicy Bypass -File .\scripts\dev.ps1           # on this computer
+        powershell -ExecutionPolicy Bypass -File .\scripts\dev.ps1 -Lan      # also reachable from a phone on the same Wi-Fi
+        powershell -ExecutionPolicy Bypass -File .\scripts\dev.ps1 -Restart  # stop the API and web client, then start again
+        powershell -ExecutionPolicy Bypass -File .\scripts\dev.ps1 -Stop     # stop the API and web client
 
     The API and the web client open in two new PowerShell windows ("LifeOS API" and
     "LifeOS Web"); close a window to stop that server. PostgreSQL keeps running in the
     background: stop it with scripts\devdb.ps1 stop.
 #>
-param([switch]$Lan)
+param([switch]$Lan, [switch]$Stop, [switch]$Restart)
 
 $ErrorActionPreference = 'Stop'
 $Root = Split-Path -Parent $PSScriptRoot
@@ -43,6 +45,39 @@ function Start-Window([string]$Title, [string]$Directory, [string]$Command) {
     $script = "`$host.UI.RawUI.WindowTitle = '$Title'; $Command"
     Start-Process powershell -WorkingDirectory $Directory -ArgumentList @('-NoExit', '-NoProfile', '-Command', $script) | Out-Null
 }
+
+# Closes the windows Start-Window opened (with the servers running in them). The
+# prod API on port 8080 and PostgreSQL are left alone.
+function Stop-DevServers {
+    $windows = Get-CimInstance Win32_Process -Filter "Name = 'powershell.exe'" -ErrorAction SilentlyContinue |
+        Where-Object { $_.CommandLine -like "*WindowTitle = 'LifeOS API'*" -or $_.CommandLine -like "*WindowTitle = 'LifeOS Web'*" }
+    foreach ($window in $windows) {
+        & taskkill.exe /PID $window.ProcessId /T /F | Out-Null
+    }
+    # A dev server started some other way still holds its port.
+    foreach ($port in @(8000, 5173)) {
+        $owners = Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue |
+            Select-Object -ExpandProperty OwningProcess -Unique
+        foreach ($owner in $owners) {
+            $process = Get-Process -Id $owner -ErrorAction SilentlyContinue
+            if ($process -and $process.ProcessName -in @('python', 'node')) {
+                & taskkill.exe /PID $owner /T /F | Out-Null
+            }
+        }
+    }
+    for ($i = 0; $i -lt 40 -and ((Test-Port 8000) -or (Test-Port 5173)); $i++) {
+        Start-Sleep -Milliseconds 250
+    }
+    if ((Test-Port 8000) -or (Test-Port 5173)) {
+        Write-Warning 'Port 8000 or 5173 is still in use by another program.'
+    }
+    else {
+        Write-Host 'Stopped the API and the web client (PostgreSQL keeps running).'
+    }
+}
+
+if ($Stop -or $Restart) { Stop-DevServers }
+if ($Stop) { return }
 
 $python = Join-Path $Root 'backend\.venv\Scripts\python.exe'
 if (-not (Test-Path -LiteralPath $python)) {

@@ -26,14 +26,57 @@ export type HabitDay = Schemas["HabitDayOut"];
 export type HabitCompletion = Schemas["HabitCompletionOut"];
 export type HabitUndo = Schemas["HabitUndoOut"];
 export type HabitFrequency = Schemas["HabitFrequency"];
+export type Cycle = Schemas["CycleOut"];
+export type CycleSummary = Schemas["CycleSummaryOut"];
+export type CycleReport = Schemas["CycleReport"];
+export type CycleCompletion = Schemas["CycleCompletionOut"];
+export type CycleStatus = Schemas["CycleDisplayStatus"];
+export type Goal = Schemas["GoalOut"];
+export type GoalMetric = Schemas["GoalMetric"];
+export type Recommendation = Schemas["Recommendation"];
+
+export interface GoalDraft {
+  title: string;
+  category: QuestCategory;
+  metric: GoalMetric;
+  target_value: number;
+  unit?: string | null;
+}
+
+export interface CycleDraft {
+  title: string;
+  description?: string | null;
+  duration_days: number;
+  starts_on?: string | null;
+  goals?: GoalDraft[];
+}
+
+export interface CyclePatch {
+  title?: string;
+  description?: string | null;
+}
+
+export interface GoalPatch {
+  title?: string;
+  target_value?: number;
+  current_value?: number;
+  unit?: string | null;
+}
+
+export interface HabitPatch {
+  title?: string;
+  description?: string | null;
+  goal_id?: string | null;
+}
+
 export type Achievement = Schemas["AchievementOut"];
 export type Rarity = Schemas["Rarity"];
 export type AchievementCategory = Schemas["AchievementCategory"];
 
-/** What a completion (quest or habit) reports back for celebrations. */
+/** What a completion (quest, habit or cycle) reports back for celebrations. */
 export interface Reward {
   xp_awarded: number;
-  xp_limit_reason: XpLimitReason | null;
+  xp_limit_reason?: XpLimitReason | null;
   player: PlayerXp;
   achievements_unlocked?: Achievement[];
   occurrence?: { minutes_credited: number | null };
@@ -46,6 +89,7 @@ export interface HabitDraft {
   frequency: HabitFrequency;
   weekdays?: number[] | null;
   times_per_week?: number | null;
+  goal_id?: string | null;
 }
 
 export type QuestType = Schemas["QuestType"];
@@ -72,6 +116,7 @@ export interface QuestDraft {
   starts_at?: string | null;
   due_at?: string | null;
   checklist?: ChecklistItem[];
+  goal_id?: string | null;
 }
 
 export interface QuestPatch {
@@ -81,6 +126,7 @@ export interface QuestPatch {
   due_at?: string | null;
   weekdays?: number[] | null;
   checklist?: ChecklistItem[];
+  goal_id?: string | null;
 }
 
 export interface RegisterData {
@@ -95,3 +141,4 @@ export const CATEGORIES: QuestCategory[] = ["learning", "health", "career", "fin
 export const ATTRIBUTES: AttributeType[] = ["health", "intelligence", "career", "finance"];
 export const DIFFICULTIES: Difficulty[] = ["simple", "medium", "hard", "epic"];
 export const ACTIVITIES: Activity[] = ["task", "learning", "workout"];
+export const GOAL_METRICS: GoalMetric[] = ["manual", "completions", "minutes"];

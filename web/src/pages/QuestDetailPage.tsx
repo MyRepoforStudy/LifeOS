@@ -5,10 +5,31 @@ import { ApiError } from "../api/client";
 import { useDeleteQuest, useQuest, useUpdateQuest } from "../api/queries";
 import type { ChecklistItem, QuestDetail } from "../api/types";
 import { useFeedback } from "../components/Feedback";
+import { GoalLinkCard } from "../components/GoalSelect";
 import { Icon } from "../components/Icon";
 import { isActionable, useQuestActions } from "../components/QuestRow";
 import { useI18n, type MessageKey } from "../i18n";
+import { acceptedMetrics } from "../lib/cycles";
 import { formatDateTime, formatDay } from "../lib/format";
+
+function QuestGoal({ quest }: { quest: QuestDetail }) {
+  const { t, errorText } = useI18n();
+  const { toast } = useFeedback();
+  const update = useUpdateQuest(quest.id);
+  return (
+    <GoalLinkCard
+      accepts={acceptedMetrics("quest", quest.activity)}
+      value={quest.goal_id}
+      saving={update.isPending}
+      onSave={(goalId) =>
+        update.mutate(
+          { goal_id: goalId },
+          { onSuccess: () => toast(t("detail.saved")), onError: (e) => toast(errorText(e), "error") },
+        )
+      }
+    />
+  );
+}
 
 function statusChip(status: QuestDetail["status"]): string {
   if (status === "completed") return "chip chip-success";
@@ -246,6 +267,7 @@ export function QuestDetailPage() {
         </div>
       </section>
 
+      <QuestGoal quest={quest} />
       <Checklist quest={quest} />
 
       <section className="card">

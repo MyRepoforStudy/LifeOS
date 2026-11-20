@@ -284,7 +284,7 @@ p {
   bottom: 0;
   z-index: 30;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   height: calc(var(--tabbar-height) + var(--safe-bottom));
   padding-bottom: var(--safe-bottom);
   background: rgba(13, 15, 20, 0.86);
@@ -1170,7 +1170,8 @@ p {
   gap: 8px;
 }
 
-.empty svg {
+/* Only the illustration: icons inside buttons keep the button's size and color. */
+.empty > svg {
   width: 34px;
   height: 34px;
   color: var(--text-faint);
@@ -1466,6 +1467,282 @@ p {
   background: linear-gradient(90deg, #221c33, #2a2140);
   border-color: rgba(185, 140, 255, 0.45);
   color: #e6d9ff;
+}
+
+/* --- cycles --------------------------------------------------------------- */
+
+.chip-frozen {
+  background: rgba(111, 195, 255, 0.12);
+  color: var(--frozen);
+}
+
+.stat-value.gold {
+  color: var(--gold);
+}
+
+.eyebrow {
+  color: var(--text-faint);
+  font-size: 12px;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.cycle-day {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.note {
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.note.gold {
+  border-color: rgba(242, 181, 68, 0.3);
+  background: var(--gold-soft);
+  color: var(--gold-strong);
+}
+
+.note.frozen {
+  border-color: rgba(111, 195, 255, 0.3);
+  background: rgba(111, 195, 255, 0.08);
+  color: var(--frozen);
+}
+
+.form-hint-error {
+  color: var(--danger);
+}
+
+.field-pair {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.goal-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.goal-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+}
+
+.goal-row + .goal-row {
+  border-top: 1px solid var(--border);
+}
+
+.goal-mark {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--surface-3);
+  color: var(--text-faint);
+}
+
+.goal-mark svg {
+  width: 16px;
+  height: 16px;
+}
+
+.goal-row.done .goal-mark,
+.goal-mark.done {
+  background: var(--gold-gradient);
+  color: #1a1206;
+}
+
+.goal-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.goal-value {
+  flex: none;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.goal-row.done .goal-value {
+  color: var(--gold);
+}
+
+.step-btn {
+  flex: none;
+  min-width: 44px;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(242, 181, 68, 0.4);
+  background: var(--gold-soft);
+  color: var(--gold);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s var(--ease), opacity 0.2s;
+}
+
+.step-btn:active:not(:disabled) {
+  transform: scale(0.92);
+}
+
+.step-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.goal-draft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 6px 6px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.goal-adder {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  border-radius: var(--radius);
+  border: 1px dashed var(--border-strong);
+}
+
+.goal-adder .btn {
+  align-self: flex-start;
+}
+
+.report-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+@media (min-width: 640px) {
+  .report-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.attr-change {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+}
+
+.attr-change + .attr-change {
+  border-top: 1px solid var(--border);
+}
+
+.attr-change-name {
+  flex: 1;
+  min-width: 0;
+  font-weight: 550;
+}
+
+.attr-change .ledger-amount {
+  margin-left: 0;
+  min-width: 48px;
+  text-align: right;
+}
+
+.report-ach {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.report-ach .chip {
+  background: color-mix(in srgb, var(--rarity-color) 14%, transparent);
+  color: var(--rarity-color);
+}
+
+.rec-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rec-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.rec-list svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  color: var(--gold);
+}
+
+.cycle-card {
+  transition: border-color 0.2s;
+}
+
+.cycle-card:hover {
+  border-color: var(--border-strong);
+}
+
+.cycle-card-title {
+  font-size: 18px;
+  font-weight: 650;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cycle-card-goals {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.cycle-card-goal {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.cycle-card-goal svg {
+  flex: none;
+  color: var(--text-faint);
+}
+
+.cycle-card-goal .quest-title {
+  flex: 1;
+  min-width: 0;
+  font-weight: 550;
+}
+
+.cycle-card-goal.done svg,
+.cycle-card-goal.done .num {
+  color: var(--gold);
 }
 
 @media (prefers-reduced-motion: reduce) {

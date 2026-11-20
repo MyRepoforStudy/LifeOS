@@ -31,7 +31,8 @@ class Settings(BaseSettings):
 
     cors_origins: list[str] = ["http://localhost:5173"]
 
-    # The built web client served by the API (production); ignored when it does not exist.
+    # The built web client served by the API; ignored when it does not exist.
+    # scripts/prod.ps1 sets WEB_DIST_DIR to web/dist-prod, its own build.
     web_dist_dir: Path | None = BACKEND_DIR.parent / "web" / "dist"
 
     # Argon2id parameters. Defaults follow the RFC 9106 "low memory" profile.

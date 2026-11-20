@@ -15,6 +15,14 @@ export function formatDay(value: string, locale: string): string {
   return new Intl.DateTimeFormat(locale, { day: "numeric", month: "short" }).format(date);
 }
 
+/** "17 December", with the year when it is not the current one. */
+export function formatLongDay(value: string, locale: string): string {
+  const date = value.length === 10 ? parseLocalDate(value) : new Date(value);
+  const options: Intl.DateTimeFormatOptions = { day: "numeric", month: "long" };
+  if (date.getFullYear() !== new Date().getFullYear()) options.year = "numeric";
+  return new Intl.DateTimeFormat(locale, options).format(date);
+}
+
 export function formatDateTime(value: string, locale: string): string {
   const date = new Date(value);
   const sameDay = new Date().toDateString() === date.toDateString();

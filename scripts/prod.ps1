@@ -14,6 +14,10 @@
     On start the script also starts PostgreSQL, makes the daily backup, applies
     migrations and rebuilds the web client when its sources changed. It can run next to
     the development servers (ports 8000 and 5173). Logs: %LOCALAPPDATA%\LifeOS\api.log
+
+    The client is built into web\dist-prod, a folder only this script writes: a
+    "npm run build" during development goes to web\dist and never changes what the
+    running app serves.
 #>
 param([switch]$Build, [switch]$Stop, [switch]$Status)
 
@@ -28,7 +32,8 @@ $env:Path = [Environment]::GetEnvironmentVariable('Path', 'Machine') + ';' + [En
 
 $python = Join-Path $Root 'backend\.venv\Scripts\python.exe'
 $webDir = Join-Path $Root 'web'
-$dist = Join-Path $webDir 'dist\index.html'
+$distDir = Join-Path $webDir 'dist-prod'
+$dist = Join-Path $distDir 'index.html'
 
 function Test-Health {
     try { return ((Invoke-RestMethod -Uri "http://127.0.0.1:$Port/health" -TimeoutSec 3).status -eq 'ok') }
@@ -106,7 +111,7 @@ if (Test-ClientOutdated) {
             if ($LASTEXITCODE -ne 0) { throw 'npm install failed.' }
         }
         Write-Host 'Building the web client...'
-        & $npm run build
+        & $npm run build -- --outDir dist-prod --emptyOutDir
         if ($LASTEXITCODE -ne 0) { throw 'The web client build failed.' }
     }
     finally { Pop-Location }
@@ -119,6 +124,8 @@ if (Test-Health) {
     Write-Host "LifeOS is already running: http://127.0.0.1:$Port"
 }
 else {
+    # The API serves the client from dist-prod (the hidden window inherits this variable).
+    $env:WEB_DIST_DIR = $distDir
     $command = "`$host.UI.RawUI.WindowTitle = 'LifeOS production'; " +
         "& '$python' -m uvicorn app.main:create_app --factory --host 127.0.0.1 --port $Port *> '$LogFile'"
     Start-Process powershell -WindowStyle Hidden -WorkingDirectory (Join-Path $Root 'backend') `

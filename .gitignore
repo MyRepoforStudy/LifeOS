@@ -13,9 +13,10 @@ htmlcov/
 .env
 !.env.example
 
-# Web client (later)
+# Web client: dependencies, development build, the build prod.ps1 serves
 node_modules/
 dist/
+dist-prod/
 
 # OS / editors
 Thumbs.db
