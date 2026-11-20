@@ -10,11 +10,12 @@ import {
   type ReactNode,
 } from "react";
 
-import type { Completion } from "../api/types";
+import type { Reward } from "../api/types";
 import { useI18n } from "../i18n";
+import { achievementText } from "../lib/achievements";
 import { Icon } from "./Icon";
 
-type ToastKind = "xp" | "info" | "error";
+type ToastKind = "xp" | "achievement" | "info" | "error";
 
 interface Toast {
   id: number;
@@ -24,8 +25,8 @@ interface Toast {
 
 interface Feedback {
   toast: (text: string, kind?: ToastKind) => void;
-  /** Toast with the XP gained, limit notes and the level-up screen. */
-  celebrate: (result: Completion) => void;
+  /** Toasts for the XP gained, limits and new achievements, then the level-up screen. */
+  celebrate: (result: Reward) => void;
 }
 
 const FeedbackContext = createContext<Feedback | null>(null);
@@ -87,15 +88,21 @@ export function FeedbackProvider({ children }: { children: ReactNode }) {
   const toast = useCallback((text: string, kind: ToastKind = "info") => {
     const id = nextId.current++;
     setToasts((current) => [...current.slice(-2), { id, kind, text }]);
-    setTimeout(() => setToasts((current) => current.filter((item) => item.id !== id)), kind === "error" ? 4200 : 2600);
+    const duration = kind === "error" ? 4200 : kind === "achievement" ? 4000 : 2600;
+    setTimeout(() => setToasts((current) => current.filter((item) => item.id !== id)), duration);
   }, []);
 
   const celebrate = useCallback(
-    (result: Completion) => {
+    (result: Reward) => {
       if (result.xp_awarded > 0) toast(t("feedback.xpGain", { xp: result.xp_awarded }), "xp");
       if (result.xp_limit_reason === "simple_task_daily_limit") toast(t("feedback.limitSimple"));
+      if (result.xp_limit_reason === "habit_daily_limit") toast(t("feedback.limitHabit"));
       if (result.xp_limit_reason === "learning_daily_cap") {
-        toast(t("feedback.limitLearning", { minutes: result.occurrence.minutes_credited ?? 0 }));
+        toast(t("feedback.limitLearning", { minutes: result.occurrence?.minutes_credited ?? 0 }));
+      }
+      for (const achievement of result.achievements_unlocked ?? []) {
+        const { title } = achievementText(t, achievement);
+        toast(t("feedback.achievement", { title, xp: achievement.xp_reward }), "achievement");
       }
       if (result.player.leveled_up) setLevelUp(result.player.level);
     },
@@ -112,6 +119,7 @@ export function FeedbackProvider({ children }: { children: ReactNode }) {
         {toasts.map((item) => (
           <div key={item.id} className={`toast ${item.kind}`}>
             {item.kind === "xp" && <Icon name="sparkle" />}
+            {item.kind === "achievement" && <Icon name="trophy" />}
             {item.text}
           </div>
         ))}

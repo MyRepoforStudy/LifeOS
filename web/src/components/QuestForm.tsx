@@ -24,7 +24,7 @@ import { Sheet } from "./Sheet";
 const WEEKDAYS = [1, 2, 3, 4, 5, 6, 7] as const;
 const ONE_OFF: QuestType[] = ["personal", "challenge", "milestone"];
 
-function useRewardRules() {
+export function useRewardRules() {
   return useQuery({
     queryKey: ["config", "rewards"],
     queryFn: () => client.request<RewardRules>("GET", "/config/rewards", { auth: false }),

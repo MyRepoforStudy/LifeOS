@@ -3,8 +3,11 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import { useAuth } from "./auth/AuthProvider";
 import { Layout } from "./components/Layout";
 import { useI18n } from "./i18n";
+import { AchievementsPage } from "./pages/AchievementsPage";
 import { AuthPage } from "./pages/AuthPage";
 import { DashboardPage } from "./pages/DashboardPage";
+import { HabitDetailPage } from "./pages/HabitDetailPage";
+import { HabitsPage } from "./pages/HabitsPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { QuestDetailPage } from "./pages/QuestDetailPage";
 import { QuestsPage } from "./pages/QuestsPage";
@@ -43,6 +46,9 @@ export function App() {
           <Route index element={<DashboardPage />} />
           <Route path="quests" element={<QuestsPage />} />
           <Route path="quests/:id" element={<QuestDetailPage />} />
+          <Route path="habits" element={<HabitsPage />} />
+          <Route path="habits/:id" element={<HabitDetailPage />} />
+          <Route path="achievements" element={<AchievementsPage />} />
           <Route path="profile" element={<ProfilePage />} />
         </Route>
         <Route path="login" element={<AuthPage mode="login" />} />

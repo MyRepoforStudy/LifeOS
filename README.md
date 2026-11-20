@@ -11,7 +11,7 @@
 | Фаза 2 — квесты: daily / weekly / personal / challenge / milestone | готово |
 | Авторизация: JWT + refresh-токены с ротацией, Argon2id | готово |
 | Клиент (PWA: React + TypeScript + Vite): главная, квесты, профиль | готово |
-| Фаза 3 — достижения и стрики | дальше |
+| Фаза 3 — привычки, серии с заморозками, 20 достижений | готово |
 | Фазы 4–6 — циклы, Adaptive Engine, аналитика | дальше |
 
 Принятые решения по ТЗ и отклонения от него — в [docs/decisions.md](docs/decisions.md).
@@ -123,6 +123,10 @@ cd web; npm.cmd test; npm.cmd run build; cd ..        # клиент: тесты
 | `GET /player/statistics` | XP по дням и характеристикам за период |
 | `GET/POST /quests`, `GET/PATCH/DELETE /quests/{id}` | квесты (`?scope=today` — квесты на сегодня) |
 | `POST /quests/{id}/complete`, `/skip`, `/undo` | выполнить, пропустить, отменить до конца дня |
+| `GET/POST /habits`, `GET/PATCH/DELETE /habits/{id}` | привычки (DELETE переносит в архив) |
+| `POST /habits/{id}/complete`, `/undo`, `/freeze` | отметить сегодня, отменить, заморозить пропуск |
+| `GET /habits/{id}/streak` | текущая и лучшая серия |
+| `GET /achievements`, `/achievements/unlocked` | каталог с прогрессом и полученные достижения |
 | `GET /config/levels`, `/config/rewards` | таблица уровней и награды с сервера |
 
 POST-запросы принимают заголовок `Idempotency-Key`. Повтор с тем же ключом

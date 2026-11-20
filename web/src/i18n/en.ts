@@ -5,6 +5,7 @@ export const en: Messages = {
   nav: { home: "Home", quests: "Quests", habits: "Habits", profile: "Profile", achievements: "Achievements" },
   habits: {
     newHabit: "New habit",
+    titlePlaceholder: "For example, “Read 20 pages”",
     empty: "No habits yet",
     emptyHint: "Start with one small habit, for example 10 minutes of reading.",
     today: "Today's habits",

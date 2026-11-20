@@ -3,9 +3,15 @@ import { NavLink, Outlet } from "react-router";
 import { useI18n } from "../i18n";
 import { Icon, type IconName } from "./Icon";
 
-const LINKS: { to: string; icon: IconName; label: "nav.home" | "nav.quests" | "nav.profile"; end?: boolean }[] = [
+const LINKS: {
+  to: string;
+  icon: IconName;
+  label: "nav.home" | "nav.quests" | "nav.habits" | "nav.profile";
+  end?: boolean;
+}[] = [
   { to: "/", icon: "home", label: "nav.home", end: true },
   { to: "/quests", icon: "target", label: "nav.quests" },
+  { to: "/habits", icon: "flame", label: "nav.habits" },
   { to: "/profile", icon: "user", label: "nav.profile" },
 ];
 

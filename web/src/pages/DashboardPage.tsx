@@ -1,15 +1,19 @@
 import { useState, type CSSProperties } from "react";
 import { Link } from "react-router";
 
-import { useAttributes, useProfile, useQuests, useXpHistory } from "../api/queries";
+import { useAchievements, useAttributes, useHabits, useProfile, useQuests, useXpHistory } from "../api/queries";
 import type { Attribute, LedgerEntry } from "../api/types";
 import { Avatar } from "../components/Avatar";
+import { HabitForm } from "../components/HabitForm";
+import { HabitRow } from "../components/HabitRow";
 import { Icon } from "../components/Icon";
 import { ProgressBar } from "../components/ProgressBar";
 import { QuestForm } from "../components/QuestForm";
 import { ATTRIBUTE_COLOR, QuestRow } from "../components/QuestRow";
 import { useI18n } from "../i18n";
+import { achievementText } from "../lib/achievements";
 import { formatDateTime, formatNumber } from "../lib/format";
+import { AchievementCard } from "./AchievementsPage";
 
 function Hero() {
   const { t, locale } = useI18n();
@@ -140,15 +144,107 @@ function TodayQuests() {
   );
 }
 
+const LEDGER_REASONS = [
+  "quest_completed",
+  "quest_completion_undone",
+  "habit_completed",
+  "habit_completion_undone",
+  "achievement_unlocked",
+  "manual_adjustment",
+] as const;
+
+function TodayHabits() {
+  const { t } = useI18n();
+  const { data } = useHabits();
+  const [creating, setCreating] = useState(false);
+  // Weekly habits count for every day of the week until the weekly goal is met.
+  const today = data?.filter(
+    (habit) =>
+      habit.required_today &&
+      (habit.done_today || habit.week_done === null || habit.week_done < (habit.times_per_week ?? 1)),
+  );
+  return (
+    <section>
+      <div className="section-title">
+        <h2>{t("habits.today")}</h2>
+        <Link className="link" to="/habits">
+          {t("nav.habits")}
+        </Link>
+      </div>
+      <div className="card flush">
+        {!data && <div className="skeleton" style={{ height: 120, margin: 6 }} />}
+        {today && today.length === 0 && (
+          <div className="empty">
+            <Icon name="flame" />
+            <strong>{data && data.length > 0 ? t("habits.todayEmpty") : t("habits.empty")}</strong>
+            {data && data.length === 0 && <p className="muted small">{t("habits.emptyHint")}</p>}
+          </div>
+        )}
+        {today && today.length > 0 && (
+          <div className="quest-list">
+            {today.map((habit) => (
+              <HabitRow key={habit.id} habit={habit} />
+            ))}
+          </div>
+        )}
+        {data && data.length === 0 && (
+          <div style={{ padding: 8 }}>
+            <button className="btn btn-block" onClick={() => setCreating(true)}>
+              <Icon name="plus" />
+              {t("habits.newHabit")}
+            </button>
+          </div>
+        )}
+      </div>
+      {creating && <HabitForm onClose={() => setCreating(false)} />}
+    </section>
+  );
+}
+
+function RecentAchievements() {
+  const { t } = useI18n();
+  const { data } = useAchievements();
+  const recent = (data ?? [])
+    .filter((a) => a.unlocked_at)
+    .sort((a, b) => (b.unlocked_at ?? "").localeCompare(a.unlocked_at ?? ""))
+    .slice(0, 3);
+  return (
+    <section>
+      <div className="section-title">
+        <h2>{t("achievements.recent")}</h2>
+        <Link className="link" to="/achievements">
+          {t("achievements.all")}
+        </Link>
+      </div>
+      {!data && <div className="skeleton" style={{ height: 90 }} />}
+      {data && recent.length === 0 && (
+        <div className="card">
+          <p className="muted small">{t("achievements.recentEmpty")}</p>
+        </div>
+      )}
+      <div className="stack" style={{ gap: 8 }}>
+        {recent.map((achievement) => (
+          <AchievementCard key={achievement.code} achievement={achievement} compact />
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function LedgerRow({ entry }: { entry: LedgerEntry }) {
   const { t, locale } = useI18n();
-  const reason = (["quest_completed", "quest_completion_undone", "manual_adjustment"] as const).find(
-    (code) => code === entry.reason,
-  );
+  const { data: achievements } = useAchievements();
+  const reason = LEDGER_REASONS.find((code) => code === entry.reason);
+  // Achievement entries store the English title; show the localized one when known.
+  const achievement =
+    entry.reason === "achievement_unlocked" ? achievements?.find((a) => a.title === entry.description) : undefined;
+  const title = achievement
+    ? achievementText(t, achievement).title
+    : (entry.description ?? (reason ? t(`ledger.${reason}`) : entry.reason));
   return (
     <div className="ledger-row">
       <div style={{ minWidth: 0 }}>
-        <div className="quest-title">{entry.description ?? (reason ? t(`ledger.${reason}`) : entry.reason)}</div>
+        <div className="quest-title">{title}</div>
         <div className="faint small">
           {reason ? t(`ledger.${reason}`) : entry.reason} · {formatDateTime(entry.created_at, locale)}
         </div>
@@ -187,9 +283,11 @@ export function DashboardPage() {
         <div className="stack">
           <Hero />
           <Attributes />
+          <RecentAchievements />
         </div>
         <div className="stack">
           <TodayQuests />
+          <TodayHabits />
           <RecentXp />
         </div>
       </div>

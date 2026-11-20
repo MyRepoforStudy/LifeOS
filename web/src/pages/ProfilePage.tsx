@@ -1,6 +1,7 @@
 import { useMemo, useState, type FormEvent } from "react";
+import { Link } from "react-router";
 
-import { useProfile, useStatistics, useUpdateProfile } from "../api/queries";
+import { useAchievements, useProfile, useStatistics, useUpdateProfile } from "../api/queries";
 import { useAuth } from "../auth/AuthProvider";
 import { Avatar } from "../components/Avatar";
 import { useFeedback } from "../components/Feedback";
@@ -65,6 +66,7 @@ export function ProfilePage() {
   const { toast } = useFeedback();
   const auth = useAuth();
   const { data: profile } = useProfile();
+  const { data: achievements } = useAchievements();
   const update = useUpdateProfile();
   const [name, setName] = useState<string | null>(null);
   const zones = useMemo(() => timeZones(profile?.pending_timezone ?? profile?.timezone ?? "UTC"), [profile]);
@@ -128,6 +130,17 @@ export function ProfilePage() {
           </div>
         </div>
       </section>
+
+      <Link to="/achievements" className="card spread" style={{ padding: "14px 18px" }}>
+        <span className="row" style={{ fontWeight: 600 }}>
+          <Icon name="trophy" width={20} height={20} style={{ color: "var(--gold)" }} />
+          {t("nav.achievements")}
+        </span>
+        <span className="row muted small num">
+          {achievements && t("achievements.summary", { unlocked: achievements.filter((a) => a.unlocked).length, total: achievements.length })}
+          <Icon name="next" width={18} height={18} />
+        </span>
+      </Link>
 
       <section className="card">
         <XpChart />

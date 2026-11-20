@@ -3,6 +3,7 @@ export const ru = {
   nav: { home: "Главная", quests: "Квесты", habits: "Привычки", profile: "Профиль", achievements: "Достижения" },
   habits: {
     newHabit: "Новая привычка",
+    titlePlaceholder: "Например, «Читать 20 страниц»",
     empty: "Привычек пока нет",
     emptyHint: "Начни с одной маленькой привычки — например, 10 минут чтения.",
     today: "Привычки на сегодня",

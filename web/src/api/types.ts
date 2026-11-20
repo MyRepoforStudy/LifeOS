@@ -36,6 +36,7 @@ export interface Reward {
   xp_limit_reason: XpLimitReason | null;
   player: PlayerXp;
   achievements_unlocked?: Achievement[];
+  occurrence?: { minutes_credited: number | null };
 }
 
 export interface HabitDraft {

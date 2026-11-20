@@ -86,7 +86,18 @@ if (Test-Port 8000) {
     Write-Host 'Port 8000 is already in use: the API seems to be running (or another program uses the port).'
 }
 else {
-    Start-Window 'LifeOS API' (Join-Path $Root 'backend') "& '$python' -m uvicorn app.main:create_app --factory --host 127.0.0.1 --port 8000 --reload"
+    # --reload-dir app: watching the whole backend folder would also poll the thousands
+    # of files in .venv and keep a CPU core busy.
+    Start-Window 'LifeOS API' (Join-Path $Root 'backend') "& '$python' -m uvicorn app.main:create_app --factory --host 127.0.0.1 --port 8000 --reload --reload-dir app"
+    # Wait for the API, so the web check below does not run before it is up.
+    for ($i = 0; $i -lt 60; $i++) {
+        try {
+            if ((Invoke-RestMethod -Uri 'http://127.0.0.1:8000/health' -TimeoutSec 2).status -eq 'ok') { break }
+        }
+        catch {
+            Start-Sleep -Milliseconds 500
+        }
+    }
 }
 
 # 5. Web client on http://localhost:5173 (it forwards /api to the API).
