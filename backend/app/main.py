@@ -12,6 +12,7 @@ from app.db import create_engine, create_sessionmaker
 from app.errors import install_error_handlers
 from app.routers import api_router
 from app.security import Passwords
+from app.web import mount_web
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -51,4 +52,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             await session.execute(text("SELECT 1"))
         return {"status": "ok"}
 
+    # Last: the catch-all route of the web client must not shadow API routes.
+    mount_web(app, settings.web_dist_dir)
     return app

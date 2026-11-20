@@ -31,6 +31,9 @@ class Settings(BaseSettings):
 
     cors_origins: list[str] = ["http://localhost:5173"]
 
+    # The built web client served by the API (production); ignored when it does not exist.
+    web_dist_dir: Path | None = BACKEND_DIR.parent / "web" / "dist"
+
     # Argon2id parameters. Defaults follow the RFC 9106 "low memory" profile.
     argon2_time_cost: int = 3
     argon2_memory_cost: int = 65536
